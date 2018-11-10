@@ -38,12 +38,13 @@ function random_word($length = 4)
 
 // Create a new database, if the file doesn't exist and open it for reading/writing.
 // The extension of the file is arbitrary.
-$db = new SQLite3('pastes_v2.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+$db = new SQLite3('pastes_v3.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 // Create a table.
 $db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	"content" VARCHAR,
+	"mode_name" VARCHAR,
 	"code" VARCHAR,
 	"revision" INTEGER,
 	"date" DATETIME
@@ -74,9 +75,17 @@ else
 	$url = $code . "-" . $revision;
 }
 
-$statement = $db->prepare('INSERT INTO "pastes" ("content", "code", "revision", "date")
-	VALUES (:acontent, :acode, :arevision, :adate)');
+$mode_name = $_POST["mode_name"];
+
+if(is_null_or_empty_string($mode_name))
+{
+	$mode_name = "Plain Text";
+}
+
+$statement = $db->prepare('INSERT INTO "pastes" ("content", "mode_name", "code", "revision", "date")
+	VALUES (:acontent, :amode_name, :acode, :arevision, :adate)');
 $statement->bindValue(':acontent', $content);
+$statement->bindValue(':amode_name', $mode_name);
 $statement->bindValue(':acode', $code);
 $statement->bindValue(':arevision', $revision);
 $statement->bindValue(':adate', $date);

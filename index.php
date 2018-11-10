@@ -21,6 +21,7 @@
 		$content = "";
 		$title = "Paste";
 		$revision = 1;
+		$mode_name = "Plain Text";
 	}
 
 	else
@@ -31,12 +32,13 @@
 
 		// Create a new database, if the file doesn't exist and open it for reading/writing.
 		// The extension of the file is arbitrary.
-		$db = new SQLite3('pastes_v2.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+		$db = new SQLite3('pastes_v3.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 		// Create a table.
 		$db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 			"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 			"content" VARCHAR,
+			"mode_name" VARCHAR,
 			"code" VARCHAR,
 			"revision" INTEGER,
 			"date" DATETIME
@@ -48,6 +50,7 @@
 		$result = $statement->execute();
 		$array = $result->fetchArray(SQLITE3_ASSOC);
 		$content = $array["content"];
+		$mode_name = $array["mode_name"];
 
 		if(is_null_or_empty_string($content))
 		{
@@ -71,17 +74,22 @@
 	<link rel='stylesheet' href='/codemirror/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/simplescrollbars.css'>
-	<link rel='stylesheet' href='/style.css?version=3'>
+	<link rel='stylesheet' href='/style.css?version=4'>
 	<script src='/codemirror/codemirror.js'></script>
-	<script src='/codemirror/mode/javascript/javascript.js'></script>
+	<script src='/codemirror/overlay.js'></script>
+	<script src='/codemirror/simple.js'></script>
+	<script src='/codemirror/multiplex.js'></script>
+	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
-	<script src='/base.js?version=5'></script>
+	<script src='/base.js?version=6'></script>
 	<script>
 		window.onload = function()
 		{
 			Paste.url = <?php echo json_encode($url); ?>;
 			Paste.initial_value = <?php echo json_encode($content); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;
+			Paste.original_mode_name = <?php echo json_encode($mode_name); ?>;
+			Paste.mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.init()
 		}
 	</script>
@@ -100,6 +108,9 @@
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_history()'>
 				<span class='paste_toolbar_button'>Paste History</span>
+			</div>
+			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_mode_selector()'>
+				<span class='paste_toolbar_button' id='paste_mode_text'>---</span>
 			</div>
 		</div>
 		<div id='paste_content_main'>

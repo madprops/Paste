@@ -208,3 +208,18 @@ a.paste_history_item:hover .paste_history_item_sample
 	padding: 0.5rem;
 	transition: box-shadow 250ms;
 }
+
+.paste_mode_selector_item
+{
+	font-size: 1.4rem;
+	padding-bottom: 1rem;
+	cursor: pointer;
+	display: inline-block;
+	margin-right: 2rem;
+	margin-left: 2rem;
+}
+
+.paste_mode_selector_item:hover
+{
+	text-decoration: underline;
+}

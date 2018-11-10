@@ -1,6 +1,7 @@
 const Paste = {}
 
 Paste.ls_paste_history = "paste_history_v1"
+Paste.ls_state = "paste_state_v1"
 Paste.max_paste_history_items = 200
 
 Paste.init = function()
@@ -10,18 +11,17 @@ Paste.init = function()
 	Paste.modal = document.getElementById("paste_modal")
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
+	Paste.mode_text = document.getElementById("paste_mode_text")
 
 	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
 	{
 		lineNumbers: true,
 		theme: "dracula",
-		mode: "javascript",
 		indentWithTabs: true,
 		scrollbarStyle: "simple"
 	})
 
 	Paste.document = Paste.editor.getDoc()
-
 	Paste.document.setValue(Paste.initial_value)
 
 	if(Paste.saved)
@@ -30,10 +30,15 @@ Paste.init = function()
 	}
 
 	Paste.remove_get_parameters_from_url()
-
 	Paste.get_paste_history()
-
 	Paste.check_paste_history()
+	Paste.get_state()
+	Paste.prepare_modes()
+}
+
+Paste.after_mode_files_loaded = function()
+{
+	Paste.set_default_mode()
 }
 
 Paste.clear_textarea = function()
@@ -51,7 +56,7 @@ Paste.save_paste = function()
 		return false
 	}
 
-	if(content === Paste.initial_value)
+	if(content === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
 	{
 		Paste.show_footer_message("Nothing Has Changed")
 		return false
@@ -70,7 +75,7 @@ Paste.save_paste = function()
 		Paste.posting = false
 	}, 10000)
 
-	Paste.send_post("save.php", {content:content})
+	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name})
 }
 
 Paste.send_post = function(target, data)
@@ -325,4 +330,165 @@ Paste.make_safe = function(s)
 {
 	let replaced = s.replace(/\</g, "&lt;").replace(/\>/g, "&gt;")
 	return replaced
+}
+
+Paste.show_mode_selector = function()
+{
+	let s = ""
+
+	s += "<div class='spacer1'></div>"
+	s += "<div class='spacer1'></div>"
+
+	s += "<div>"
+	s += Paste.modes_string
+	s += "</div>"
+
+	s += "<div class='spacer1'></div>"
+	s += "<div class='spacer1'></div>"
+
+	Paste.show_modal(s)
+}
+
+Paste.prepare_modes = function()
+{
+	Paste.modes_string = ""
+	Paste.modes_dict = {}
+	Paste.modes = []
+
+	for(let mode of CodeMirror.modeInfo)
+	{
+		Paste.modes_dict[mode.name] = mode.mode
+		Paste.modes_string += `<div class='paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
+		
+		if(!Paste.modes.includes(mode.mode))
+		{
+			Paste.modes.push(mode.mode)
+		}
+	}
+
+	Paste.mode_files_processed = 0
+	Paste.load_mode_file(Paste.modes[0])
+}
+
+Paste.check_mode_files_processed = function()
+{
+	Paste.mode_files_processed += 1
+
+	if(Paste.mode_files_processed < Paste.modes.length)
+	{
+		Paste.load_mode_file(Paste.modes[Paste.mode_files_processed])
+	}
+
+	else
+	{
+		Paste.after_mode_files_loaded()
+	}
+}
+
+Paste.load_mode_file = function(mode)
+{
+	if(mode === "null")
+	{
+		Paste.check_mode_files_processed()
+		return
+	}
+
+	let id = Paste.remove_non_alphanumeric(`paste_mode_${mode}`)
+
+	let result = document.querySelector(`#${id}`)
+
+	if(!result)
+	{
+		let script = document.createElement("script")
+		
+		script.id = id
+		script.src = `codemirror/mode/${mode}/${mode}.js`
+		script.async = false
+		
+		document.head.appendChild(script)
+
+		let script_el = document.querySelector(`#${id}`)
+	 
+		script_el.addEventListener('load', function() 
+		{
+			Paste.check_mode_files_processed()
+		})
+
+		script_el.addEventListener('error', function() 
+		{
+			Paste.check_mode_files_processed()
+		})
+	}
+}
+
+Paste.do_change_mode = function(name, mode)
+{
+	Paste.editor.setOption("mode", mode)
+	Paste.mode_text.innerHTML = name
+	Paste.state.mode_name = name
+	Paste.mode_name = name
+	Paste.save_state()
+}
+
+Paste.change_mode = function(name, close_modal=false)
+{
+	let mode = Paste.modes_dict[name]
+
+	if(!mode)
+	{
+		return false
+	}
+
+	Paste.do_change_mode(name, mode)
+
+	if(close_modal)
+	{
+		Paste.hide_modal()
+	}
+}
+
+Paste.set_default_mode = function()
+{
+	if(Paste.mode_name)
+	{
+		Paste.change_mode(Paste.mode_name)
+	}
+
+	else
+	{
+		Paste.change_mode(Paste.state.mode_name)
+	}
+}
+
+Paste.remove_non_alphanumeric = function(s)
+{
+	return s.replace(/[\W_]+/g, "");
+}
+
+Paste.get_state = function()
+{
+	Paste.state = Paste.get_local_storage(Paste.ls_state)
+
+	if(Paste.state === null)
+	{
+		Paste.state = {}
+	}
+
+	let changed = false
+
+	if(Paste.state.mode_name === undefined)
+	{
+		Paste.state.mode_name = "JavaScript"
+		changed = true
+	}
+
+	if(changed)
+	{
+		Paste.save_state()
+	}
+}
+
+Paste.save_state = function()
+{
+	Paste.save_local_storage(Paste.ls_paste_state, Paste.state)
 }
