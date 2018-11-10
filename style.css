@@ -201,6 +201,15 @@ a.paste_history_item:hover .paste_history_item_sample
 	transition: text-shadow 250ms;
 }
 
+.paste_history_item_mode_name
+{
+	padding-top: 0.5rem;
+	padding-bottom: 0.5rem;
+	text-align: center;
+	font-size: 1rem;
+	color: black;
+}
+
 .paste_history_item_sample
 {
 	margin-top: 0.2rem;

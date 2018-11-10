@@ -215,7 +215,7 @@ Paste.check_paste_history = function()
 
 	if(index === -1)
 	{
-		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample()})
+		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name})
 
 		if(Paste.paste_history.items.length > Paste.max_paste_history_items)
 		{
@@ -226,7 +226,7 @@ Paste.check_paste_history = function()
 	else
 	{
 		Paste.paste_history.items.splice(index, 1)
-		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample()})
+		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name})
 	}
 
 	Paste.save_paste_history()
@@ -305,6 +305,12 @@ Paste.show_history = function()
 
 		s += `<a class='paste_history_item' href='${item.url}'>`
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
+
+		if(item.mode_name)
+		{
+			s += `<div class='paste_history_item_mode_name'>(${item.mode_name})</div>`
+		}
+		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
 		s += `</a>`
 	}

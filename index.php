@@ -74,14 +74,14 @@
 	<link rel='stylesheet' href='/codemirror/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/simplescrollbars.css'>
-	<link rel='stylesheet' href='/style.css?version=5'>
+	<link rel='stylesheet' href='/style.css?version=6'>
 	<script src='/codemirror/codemirror.js'></script>
 	<script src='/codemirror/overlay.js'></script>
 	<script src='/codemirror/simple.js'></script>
 	<script src='/codemirror/multiplex.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
-	<script src='/base.js?version=8'></script>
+	<script src='/base.js?version=9'></script>
 	<script>
 		window.onload = function()
 		{
