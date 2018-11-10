@@ -81,7 +81,7 @@
 	<script src='/codemirror/multiplex.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
-	<script src='/base.js?version=10'></script>
+	<script src='/base.js?version=11'></script>
 	<script>
 		window.onload = function()
 		{

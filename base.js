@@ -1,7 +1,6 @@
 const Paste = {}
 
 Paste.ls_paste_history = "paste_history_v1"
-Paste.ls_state = "paste_state_v1"
 Paste.max_paste_history_items = 200
 
 Paste.init = function()
@@ -35,7 +34,6 @@ Paste.init = function()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_paste_history()
 	Paste.check_paste_history()
-	Paste.get_state()
 	Paste.prepare_modes()
 }
 
@@ -440,9 +438,7 @@ Paste.do_change_mode = function(name, mode)
 {
 	Paste.editor.setOption("mode", mode)
 	Paste.mode_text.innerHTML = name
-	Paste.state.mode_name = name
 	Paste.mode_name = name
-	Paste.save_state()
 }
 
 Paste.change_mode = function(name, close_modal=false)
@@ -464,46 +460,10 @@ Paste.change_mode = function(name, close_modal=false)
 
 Paste.set_default_mode = function()
 {
-	if(Paste.mode_name)
-	{
-		Paste.change_mode(Paste.mode_name)
-	}
-
-	else
-	{
-		Paste.change_mode(Paste.state.mode_name)
-	}
+	Paste.change_mode(Paste.mode_name)
 }
 
 Paste.remove_non_alphanumeric = function(s)
 {
 	return s.replace(/[\W_]+/g, "");
-}
-
-Paste.get_state = function()
-{
-	Paste.state = Paste.get_local_storage(Paste.ls_state)
-
-	if(Paste.state === null)
-	{
-		Paste.state = {}
-	}
-
-	let changed = false
-
-	if(Paste.state.mode_name === undefined)
-	{
-		Paste.state.mode_name = "JavaScript"
-		changed = true
-	}
-
-	if(changed)
-	{
-		Paste.save_state()
-	}
-}
-
-Paste.save_state = function()
-{
-	Paste.save_local_storage(Paste.ls_paste_state, Paste.state)
 }
