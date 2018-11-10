@@ -75,7 +75,7 @@
 	<script src='/codemirror/codemirror.js'></script>
 	<script src='/codemirror/mode/javascript/javascript.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
-	<script src='/base.js?version=4'></script>
+	<script src='/base.js?version=5'></script>
 	<script>
 		window.onload = function()
 		{

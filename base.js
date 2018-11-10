@@ -75,10 +75,10 @@ Paste.save_paste = function()
 
 Paste.send_post = function(target, data)
 {
-	var XHR = new XMLHttpRequest()
-	var urlEncodedData = ""
-	var urlEncodedDataPairs = []
-	var name
+	let XHR = new XMLHttpRequest()
+	let urlEncodedData = ""
+	let urlEncodedDataPairs = []
+	let name
 
 	XHR.responseType = "json"
 
