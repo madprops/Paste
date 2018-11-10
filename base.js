@@ -110,7 +110,7 @@ Paste.send_post = function(target, data)
 	// Add the required HTTP header for form data POST requests
 	XHR.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded')
 
-	XHR.onreadystatechange = function (aEvt) 
+	XHR.onreadystatechange = function(aEvt) 
 	{
 		if(XHR.readyState == 4) 
 		{

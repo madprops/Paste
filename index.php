@@ -71,7 +71,7 @@
 	<link rel='stylesheet' href='/codemirror/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/simplescrollbars.css'>
-	<link rel='stylesheet' href='/style.css?version=2'>
+	<link rel='stylesheet' href='/style.css?version=3'>
 	<script src='/codemirror/codemirror.js'></script>
 	<script src='/codemirror/mode/javascript/javascript.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
@@ -89,16 +89,16 @@
 <body>
 	<div id='paste_main'>
 		<div id='paste_toolbar' class='paste_unselectable'>
-			<div id='paste_toolbar_save' class='paste_action paste_toolbar_button_container' onclick='Paste.save_paste()'>
+			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
 				<span class='paste_toolbar_button'>Save Paste</span>
 			</div>
-			<div id='paste_toolbar_clear' class='paste_action paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
+			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
 				<span class='paste_toolbar_button'>New Paste</span>
 			</div>
-			<div id='paste_toolbar_clear' class='paste_action paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
+			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
 				<span class='paste_toolbar_button'>Copy URL</span>
 			</div>
-			<div id='paste_toolbar_clear' class='paste_action paste_toolbar_button_container paste_border_left' onclick='Paste.show_history()'>
+			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_history()'>
 				<span class='paste_toolbar_button'>Paste History</span>
 			</div>
 		</div>

@@ -38,6 +38,7 @@ body, html
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
+	transition: background-color 250ms ease;
 }
 
 .paste_toolbar_button_container:hover
