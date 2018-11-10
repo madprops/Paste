@@ -180,7 +180,7 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 	width: 80%;
 }
 
-a.paste_history_item:hover .paste_history_item_code
+a.paste_history_item:hover .paste_history_item_url
 {
 	font-weight: bold;
 }

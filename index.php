@@ -71,7 +71,7 @@
 	<link rel='stylesheet' href='/codemirror/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/simplescrollbars.css'>
-	<link rel='stylesheet' href='/style.css'>
+	<link rel='stylesheet' href='/style.css?version=2'>
 	<script src='/codemirror/codemirror.js'></script>
 	<script src='/codemirror/mode/javascript/javascript.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
