@@ -70,7 +70,7 @@ Paste.save_paste = function()
 		Paste.posting = false
 	}, 10000)
 
-	Paste.send_post("save.php", {content:content, url:Paste.url})
+	Paste.send_post("save.php", {content:content})
 }
 
 Paste.send_post = function(target, data)

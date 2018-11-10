@@ -53,7 +53,10 @@ $db->exec('BEGIN');
 
 $date = time();
 $content = $_POST["content"];
-$url = $_POST["url"];
+$ourl = $_SERVER['HTTP_REFERER'];
+$ourl = strtok($ourl, '?');
+$exploded = explode("/", $ourl);
+$url = array_pop($exploded);
 
 if(is_null_or_empty_string($url))
 {
