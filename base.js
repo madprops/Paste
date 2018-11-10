@@ -44,6 +44,7 @@ Paste.after_mode_files_loaded = function()
 	Paste.set_default_mode()
 	Paste.loading.style.display = "none"
 	Paste.main.style.display = "block"
+	Paste.editor.refresh()
 }
 
 Paste.clear_textarea = function()
