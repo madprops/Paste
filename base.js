@@ -6,12 +6,15 @@ Paste.max_paste_history_items = 200
 
 Paste.init = function()
 {
+	Paste.main = document.getElementById("paste_main")
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
 	Paste.mode_text = document.getElementById("paste_mode_text")
+	Paste.loading = document.getElementById("paste_loading")
+	Paste.loading_inner = document.getElementById("paste_loading_inner")
 
 	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
 	{
@@ -39,6 +42,8 @@ Paste.init = function()
 Paste.after_mode_files_loaded = function()
 {
 	Paste.set_default_mode()
+	Paste.loading.style.display = "none"
+	Paste.main.style.display = "block"
 }
 
 Paste.clear_textarea = function()
@@ -376,11 +381,13 @@ Paste.check_mode_files_processed = function()
 
 	if(Paste.mode_files_processed < Paste.modes.length)
 	{
+		Paste.loading_inner.style.width = `${(Paste.mode_files_processed / Paste.modes.length) * 40}em`
 		Paste.load_mode_file(Paste.modes[Paste.mode_files_processed])
 	}
 
 	else
 	{
+		Paste.loading_inner.style.width = "100%"
 		Paste.after_mode_files_loaded()
 	}
 }

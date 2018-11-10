@@ -5,6 +5,7 @@ body, html
 	height: 100%;
 	width: 100%;
 	font-family: sans-serif;
+	background-color: black;
 }
 
 #paste_main
@@ -13,6 +14,7 @@ body, html
 	padding: 0;
 	width: 100%;
 	height: 100%;
+	display: none;
 }
 
 #paste_toolbar
@@ -222,4 +224,26 @@ a.paste_history_item:hover .paste_history_item_sample
 .paste_mode_selector_item:hover
 {
 	text-decoration: underline;
+}
+
+#paste_loading
+{
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	background-color: white;
+	z-index: 9999999999;
+	width: 40rem;
+	height: 2rem;
+	display: block;
+	overflow: hidden;
+}
+
+#paste_loading_inner
+{
+	position: relative;
+	width: 0;
+	height: 100%;
+	background-color: grey
 }

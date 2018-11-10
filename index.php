@@ -74,14 +74,14 @@
 	<link rel='stylesheet' href='/codemirror/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/simplescrollbars.css'>
-	<link rel='stylesheet' href='/style.css?version=4'>
+	<link rel='stylesheet' href='/style.css?version=5'>
 	<script src='/codemirror/codemirror.js'></script>
 	<script src='/codemirror/overlay.js'></script>
 	<script src='/codemirror/simple.js'></script>
 	<script src='/codemirror/multiplex.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/simplescrollbars.js'></script>
-	<script src='/base.js?version=6'></script>
+	<script src='/base.js?version=7'></script>
 	<script>
 		window.onload = function()
 		{
@@ -116,10 +116,13 @@
 		<div id='paste_content_main'>
 			<textarea id='paste_textarea'></textarea>
 		</div>
-		<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
-		<div id='paste_modal'>
-			<div id='paste_modal_inner'></div>
-		</div>
+	</div>
+	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
+	<div id='paste_modal'>
+		<div id='paste_modal_inner'></div>
+	</div>
+	<div id='paste_loading'>
+		<div id='paste_loading_inner'></div>
 	</div>
 	<div id='paste_footer' class='paste_unselectable'></div>
 </body>
