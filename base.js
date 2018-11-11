@@ -397,7 +397,15 @@ Paste.hide_modal = function()
 
 Paste.new_paste = function()
 {
-	window.location.href = "/"
+	if(Paste.url)
+	{
+		window.location.href = "/"		
+	}
+
+	else
+	{
+		Paste.document.setValue("")
+	}
 }
 
 Paste.make_safe = function(s)
