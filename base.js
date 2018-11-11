@@ -487,6 +487,17 @@ Paste.prepare_modes = function()
 Paste.do_change_mode = function(name, mode)
 {
 	Paste.editor.setOption("mode", mode)
+	
+	if(mode === "null")
+	{
+		Paste.editor.setOption("lineWrapping", true)
+	}
+
+	else
+	{
+		Paste.editor.setOption("lineWrapping", false)
+	}
+
 	Paste.mode_text.innerHTML = name
 	Paste.mode_name = name
 }
