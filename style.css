@@ -271,3 +271,8 @@ a.paste_history_item:hover .paste_history_item_sample
 	border: 0;
 	outline: none;
 }
+
+#paste_textarea
+{
+	display: none;
+}
