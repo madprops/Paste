@@ -48,6 +48,8 @@ Paste.clear_textarea = function()
 
 Paste.save_paste = function()
 {
+	Paste.editor.focus()
+
 	let content = Paste.document.getValue()
 
 	if(!content.trim())
