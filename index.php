@@ -80,7 +80,7 @@
 	<script src='/codemirror/addon/mode/simple.js'></script>
 	<script src='/codemirror/addon/mode/multiplex.js'></script>
 	<script src='/codemirror/addon/mode/loadmode.js'></script>
-	<script src='/codemirror/mode/mode_bundle.js'></script>
+	<script src='/codemirror/mode/mode_bundle_min.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/base.js?version=12'></script>
