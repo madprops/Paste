@@ -405,7 +405,7 @@ Paste.show_mode_selector = function()
 	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
-	s += "<div>"
+	s += "<div id='paste_mode_selector_container'>"
 	s += Paste.modes_string
 	s += "</div>"
 
@@ -462,7 +462,7 @@ Paste.do_mode_selector_filter = function(value)
 	{
 		if(item.innerHTML.toLowerCase().includes(lc_value))
 		{
-			item.style.display = "inline-block"
+			item.style.display = "flex"
 		}
 
 		else

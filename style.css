@@ -54,12 +54,12 @@ body, html
 
 .paste_border_left
 {
-	border-left: 1px solid #515168;
+	border-left: 2px solid #515168;
 }
 
 .paste_border_right
 {
-	border-right: 1px solid #515168;
+	border-right: 2px solid #515168;
 }
 
 .paste_action
@@ -219,19 +219,32 @@ a.paste_history_item:hover .paste_history_item_sample
 	transition: box-shadow 250ms;
 }
 
+#paste_mode_selector_container
+{
+	position: relative;
+	width: 80%;
+}
+
 .paste_mode_selector_item
 {
 	font-size: 1.4rem;
-	padding-bottom: 1rem;
 	cursor: pointer;
-	display: inline-block;
-	margin-right: 2rem;
-	margin-left: 2rem;
+	background-color: #7b729f;
+	color: white;
+	text-align: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	padding-top: 1rem;
+	padding-bottom: 1rem;
+	margin-bottom: 2rem;
+	transition: box-shadow 250ms;
 }
 
 .paste_mode_selector_item:hover
 {
-	text-decoration: underline;
+	box-shadow: 0 0 10px black;
 }
 
 .paste_filter
@@ -242,4 +255,10 @@ a.paste_history_item:hover .paste_history_item_sample
 	font-size: 25px;
 	text-align: center;
 	margin-top:1rem;
+	background-color: white;
+	color: black;
+	z-index: 999;
+	box-shadow: 0 0 5px black;
+	border: 0;
+	outline: none;
 }
