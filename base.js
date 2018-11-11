@@ -2,6 +2,7 @@ const Paste = {}
 
 Paste.ls_paste_history = "paste_history_v1"
 Paste.max_paste_history_items = 200
+Paste.filter_delay = 250
 
 Paste.init = function()
 {
@@ -12,15 +13,14 @@ Paste.init = function()
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
 	Paste.mode_text = document.getElementById("paste_mode_text")
-	Paste.loading = document.getElementById("paste_loading")
-	Paste.loading_inner = document.getElementById("paste_loading_inner")
 
 	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
 	{
 		lineNumbers: true,
 		theme: "dracula",
 		indentWithTabs: true,
-		scrollbarStyle: "simple"
+		scrollbarStyle: "simple",
+		tabSize: 4
 	})
 
 	Paste.document = Paste.editor.getDoc()
@@ -35,13 +35,7 @@ Paste.init = function()
 	Paste.get_paste_history()
 	Paste.check_paste_history()
 	Paste.prepare_modes()
-}
-
-Paste.after_mode_files_loaded = function()
-{
 	Paste.set_default_mode()
-	Paste.loading.style.display = "none"
-	Paste.main.style.display = "block"
 	Paste.editor.refresh()
 	Paste.editor.focus()
 }
@@ -295,6 +289,8 @@ Paste.show_history = function()
 {
 	let s = ""
 
+	s += "<input type='text' class='paste_filter' id='paste_history_filter' placeholder='Filter'>"
+
 	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
@@ -317,6 +313,63 @@ Paste.show_history = function()
 	s += "<div class='spacer1'></div>"
 
 	Paste.show_modal(s)
+
+	let filter = document.querySelector("#paste_history_filter")
+
+	filter.addEventListener("keyup", function(e)
+	{
+		if(e.key === "Escape")
+		{
+			if(filter.value === "")
+			{
+				Paste.hide_modal()
+			}
+
+			else
+			{
+				filter.value = ""
+			}
+		}
+		
+		Paste.paste_history_filter_timer(filter.value.trim())
+	})
+
+	filter.focus()
+}
+
+Paste.paste_history_filter_timer = (function(value)
+{
+	let timer
+
+	return function(value)
+	{
+		clearTimeout(timer)
+
+		timer = setTimeout(function()
+		{
+			Paste.do_paste_history_filter(value)
+		}, Paste.filter_delay)
+	}
+})()
+
+Paste.do_paste_history_filter = function(value)
+{
+	let lc_value = value.toLowerCase()
+
+	let items = Array.from(document.querySelectorAll(".paste_history_item"))
+
+	for(let item of items)
+	{
+		if(item.innerHTML.toLowerCase().includes(lc_value))
+		{
+			item.style.display = "initial"
+		}
+
+		else
+		{
+			item.style.display = "none"
+		}
+	}
 }
 
 Paste.show_modal = function(html)
@@ -347,6 +400,8 @@ Paste.show_mode_selector = function()
 {
 	let s = ""
 
+	s += "<input type='text' class='paste_filter' id='paste_mode_selector_filter' placeholder='Filter'>"
+
 	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
@@ -358,79 +413,74 @@ Paste.show_mode_selector = function()
 	s += "<div class='spacer1'></div>"
 
 	Paste.show_modal(s)
+
+	let filter = document.querySelector("#paste_mode_selector_filter")
+
+	filter.addEventListener("keyup", function(e)
+	{
+		if(e.key === "Escape")
+		{
+			if(filter.value === "")
+			{
+				Paste.hide_modal()
+			}
+
+			else
+			{
+				filter.value = ""
+			}
+		}
+		
+		Paste.mode_selector_filter_timer(filter.value.trim())
+	})
+
+	filter.focus()
+}
+
+Paste.mode_selector_filter_timer = (function(value)
+{
+	let timer
+
+	return function(value)
+	{
+		clearTimeout(timer)
+
+		timer = setTimeout(function()
+		{
+			Paste.do_mode_selector_filter(value)
+		}, Paste.filter_delay)
+	}
+})()
+
+Paste.do_mode_selector_filter = function(value)
+{
+	let lc_value = value.toLowerCase()
+
+	let items = Array.from(document.querySelectorAll(".paste_mode_selector_item"))
+
+	for(let item of items)
+	{
+		if(item.innerHTML.toLowerCase().includes(lc_value))
+		{
+			item.style.display = "inline-block"
+		}
+
+		else
+		{
+			item.style.display = "none"
+		}
+	}
 }
 
 Paste.prepare_modes = function()
 {
 	Paste.modes_string = ""
 	Paste.modes_dict = {}
-	Paste.modes = []
 
 	for(let mode of CodeMirror.modeInfo)
 	{
 		Paste.modes_dict[mode.name] = mode.mode
 		Paste.modes_string += `<div class='paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
-		
-		if(!Paste.modes.includes(mode.mode))
-		{
-			Paste.modes.push(mode.mode)
-		}
-	}
-
-	Paste.mode_files_processed = 0
-	Paste.load_mode_file(Paste.modes[0])
-}
-
-Paste.check_mode_files_processed = function()
-{
-	Paste.mode_files_processed += 1
-
-	if(Paste.mode_files_processed < Paste.modes.length)
-	{
-		Paste.loading_inner.style.width = `${(Paste.mode_files_processed / Paste.modes.length) * 40}em`
-		Paste.load_mode_file(Paste.modes[Paste.mode_files_processed])
-	}
-
-	else
-	{
-		Paste.loading_inner.style.width = "100%"
-		Paste.after_mode_files_loaded()
-	}
-}
-
-Paste.load_mode_file = function(mode)
-{
-	if(mode === "null")
-	{
-		Paste.check_mode_files_processed()
-		return
-	}
-
-	let id = Paste.remove_non_alphanumeric(`paste_mode_${mode}`)
-
-	let result = document.querySelector(`#${id}`)
-
-	if(!result)
-	{
-		let script = document.createElement("script")
-		
-		script.id = id
-		script.src = `codemirror/mode/${mode}/${mode}.js`
-		script.async = false
-		
-		document.head.appendChild(script)
-
-		let script_el = document.querySelector(`#${id}`)
-	 
-		script_el.addEventListener('load', function() 
-		{
-			Paste.check_mode_files_processed()
-		})
-
-		script_el.addEventListener('error', function() 
-		{
-			Paste.check_mode_files_processed()
-		})
 	}
 }
 
@@ -441,7 +491,7 @@ Paste.do_change_mode = function(name, mode)
 	Paste.mode_name = name
 }
 
-Paste.change_mode = function(name, close_modal=false)
+Paste.change_mode = function(name, hide_modal=false)
 {
 	let mode = Paste.modes_dict[name]
 
@@ -452,7 +502,7 @@ Paste.change_mode = function(name, close_modal=false)
 
 	Paste.do_change_mode(name, mode)
 
-	if(close_modal)
+	if(hide_modal)
 	{
 		Paste.hide_modal()
 	}
