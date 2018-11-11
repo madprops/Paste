@@ -53,11 +53,38 @@ $db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 $db->exec('BEGIN');
 
 $date = time();
-$content = $_POST["content"];
-$ourl = $_SERVER['HTTP_REFERER'];
-$ourl = strtok($ourl, '?');
-$exploded = explode("/", $ourl);
-$url = array_pop($exploded);
+
+if(isset($_POST["content"]))
+{
+	$content = $_POST["content"];
+}
+
+else
+{
+	exit();
+}
+
+if(isset($_SERVER['HTTP_REFERER']))
+{
+	$ourl = $_SERVER['HTTP_REFERER'];
+
+	if(is_null_or_empty_string($ourl))
+	{
+		$url = "";
+	}
+
+	else
+	{
+		$ourl = strtok($ourl, '?');
+		$exploded = explode("/", $ourl);
+		$url = array_pop($exploded);
+	}
+}
+
+else
+{
+	$url = "";
+}
 
 if(is_null_or_empty_string($url))
 {
@@ -75,9 +102,17 @@ else
 	$url = $code . "-" . $revision;
 }
 
-$mode_name = $_POST["mode_name"];
+if(isset($_POST["mode_name"]))
+{
+	$mode_name = $_POST["mode_name"];
 
-if(is_null_or_empty_string($mode_name))
+	if(is_null_or_empty_string($mode_name))
+	{
+		$mode_name = "Plain Text";
+	}
+}
+
+else
 {
 	$mode_name = "Plain Text";
 }
