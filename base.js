@@ -148,6 +148,7 @@ Paste.copy_url = function()
 {
 	Paste.copy_to_clipboard(window.location.href)
 	Paste.show_footer_message("URL Copied To Clipboard")
+	Paste.editor.focus()
 }
 
 Paste.show_footer_message = function(s)
@@ -393,6 +394,7 @@ Paste.hide_modal = function()
 {
 	Paste.overlay.style.display = "none"
 	Paste.modal.style.display = "none"
+	Paste.editor.focus()
 }
 
 Paste.new_paste = function()
@@ -405,6 +407,7 @@ Paste.new_paste = function()
 	else
 	{
 		Paste.document.setValue("")
+		Paste.editor.focus()
 	}
 }
 

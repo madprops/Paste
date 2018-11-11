@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/perfect-scrollbar.min.js'></script>
-	<script src='/base.js?version=17'></script>
+	<script src='/base.js?version=18'></script>
 	<script>
 		window.onload = function()
 		{
