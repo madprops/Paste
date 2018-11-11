@@ -83,7 +83,7 @@
 	<script src='/codemirror/mode/mode_bundle_min.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
-	<script src='/base.js?version=14'></script>
+	<script src='/base.js?version=15'></script>
 	<script>
 		window.onload = function()
 		{

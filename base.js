@@ -476,12 +476,38 @@ Paste.prepare_modes = function()
 {
 	Paste.modes_string = ""
 	Paste.modes_dict = {}
+	
+	let modes_string_array = []
+
+	let pinned = ["JavaScript", "HTML", "CSS", "Python", "Java", "Plain Text"]
 
 	for(let mode of CodeMirror.modeInfo)
 	{
 		Paste.modes_dict[mode.name] = mode.mode
-		Paste.modes_string += `<div class='paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
+
+		let pindex = pinned.indexOf(mode.name)
+
+		let position
+
+		if(pindex === -1)
+		{
+			position = pinned.length
+		}
+
+		else
+		{
+			position = pindex
+		}
+
+		modes_string_array.push({position:position, string:`<div class='paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`})
 	}
+
+	modes_string_array.sort(function(a, b) 
+	{
+		return a.position - b.position
+	})
+
+	Paste.modes_string = modes_string_array.map(e => e.string).join("")
 }
 
 Paste.do_change_mode = function(name, mode)
