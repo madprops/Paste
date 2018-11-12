@@ -75,7 +75,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=11'>
+	<link rel='stylesheet' href='/css/style.css?version=12'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=26'></script>
+	<script src='/js/base.js?version=27'></script>
 	<script>
 		window.onload = function()
 		{
@@ -123,6 +123,10 @@
 	</div>
 	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
 	<div id='paste_modal'>
+		<div id='paste_modal_titlebar'></div>
+		<div id='paste_modal_filter_container'>
+			<input type='text' id='paste_modal_filter' placeholder='Filter'>
+		</div>
 		<div id='paste_modal_inner'></div>
 	</div>
 	<div id='paste_footer' class='paste_unselectable'></div>

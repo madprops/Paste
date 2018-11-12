@@ -5,6 +5,7 @@ Paste.ls_mode_history = "mode_history_v1"
 Paste.max_paste_history_items = 200
 Paste.max_mode_history_items = 10
 Paste.filter_delay = 250
+Paste.modal_type = ""
 
 Paste.init = function()
 {
@@ -12,6 +13,8 @@ Paste.init = function()
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
+	Paste.modal_titlebar = document.getElementById("paste_modal_titlebar")
+	Paste.modal_filter = document.getElementById("paste_modal_filter")
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
 	Paste.mode_text = document.getElementById("paste_mode_text")
@@ -34,9 +37,10 @@ Paste.init = function()
 	Paste.check_paste_history()
 	Paste.prepare_modes()
 	Paste.set_default_mode()
+	Paste.start_scrollbars()
+	Paste.setup_modal_filter()
 	Paste.editor.refresh()
 	Paste.editor.focus()
-	Paste.start_scrollbars()
 }
 
 Paste.create_editor = function()
@@ -338,9 +342,6 @@ Paste.show_history = function()
 {
 	let s = ""
 
-	s += "<input type='text' class='paste_filter' id='paste_history_filter' placeholder='Filter'>"
-
-	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
 	for(let i=0; i<Paste.paste_history.items.length; i++)
@@ -361,32 +362,31 @@ Paste.show_history = function()
 
 	s += "<div class='spacer1'></div>"
 
-	Paste.show_modal(s)
+	Paste.show_modal(s, "Paste History")
+}
 
-	let filter = document.querySelector("#paste_history_filter")
-
-	filter.addEventListener("keyup", function(e)
+Paste.setup_modal_filter = function()
+{
+	Paste.modal_filter.addEventListener("keyup", function(e)
 	{
 		if(e.key === "Escape")
 		{
-			if(filter.value === "")
+			if(Paste.modal_filter.value === "")
 			{
 				Paste.hide_modal()
 			}
 
 			else
 			{
-				filter.value = ""
+				Paste.modal_filter.value = ""
 			}
 		}
 		
-		Paste.paste_history_filter_timer(filter.value.trim())
+		Paste.modal_filter_timer(Paste.modal_filter.value.trim())
 	})
-
-	filter.focus()
 }
 
-Paste.paste_history_filter_timer = (function(value)
+Paste.modal_filter_timer = (function(value)
 {
 	let timer
 
@@ -396,7 +396,15 @@ Paste.paste_history_filter_timer = (function(value)
 
 		timer = setTimeout(function()
 		{
-			Paste.do_paste_history_filter(value)
+			if(Paste.modal_type === "Paste History")
+			{
+				Paste.do_paste_history_filter(value)
+			}
+
+			else if(Paste.modal_type === "Language Mode")
+			{
+				Paste.do_mode_selector_filter(value)
+			}
 		}, Paste.filter_delay)
 	}
 })()
@@ -429,19 +437,23 @@ Paste.after_filter = function()
 	Paste.scroll_modal_to_top()
 }
 
-Paste.show_modal = function(html)
+Paste.show_modal = function(html, title)
 {
+	Paste.modal_titlebar.innerHTML = title
 	Paste.modal_inner.innerHTML = html
 	Paste.overlay.style.display = "block"
-	Paste.modal.style.display = "block"
+	Paste.modal.style.display = "flex"
 	Paste.update_modal_scrollbar()
 	Paste.scroll_modal_to_top()
+	Paste.modal_filter.focus()
+	Paste.modal_type = title
 }
 
 Paste.hide_modal = function()
 {
 	Paste.overlay.style.display = "none"
 	Paste.modal.style.display = "none"
+	Paste.modal_type = ""
 	Paste.editor.focus()
 }
 
@@ -474,9 +486,6 @@ Paste.show_mode_selector = function()
 {
 	let s = ""
 
-	s += "<input type='text' class='paste_filter' id='paste_mode_selector_filter' placeholder='Filter'>"
-
-	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
 	s += "<div id='paste_mode_selector_container' class='paste_unselectable'>"
@@ -486,45 +495,8 @@ Paste.show_mode_selector = function()
 	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
-	Paste.show_modal(s)
-
-	let filter = document.querySelector("#paste_mode_selector_filter")
-
-	filter.addEventListener("keyup", function(e)
-	{
-		if(e.key === "Escape")
-		{
-			if(filter.value === "")
-			{
-				Paste.hide_modal()
-			}
-
-			else
-			{
-				filter.value = ""
-			}
-		}
-		
-		Paste.mode_selector_filter_timer(filter.value.trim())
-	})
-
-	filter.focus()
+	Paste.show_modal(s, "Language Mode")
 }
-
-Paste.mode_selector_filter_timer = (function(value)
-{
-	let timer
-
-	return function(value)
-	{
-		clearTimeout(timer)
-
-		timer = setTimeout(function()
-		{
-			Paste.do_mode_selector_filter(value)
-		}, Paste.filter_delay)
-	}
-})()
 
 Paste.do_mode_selector_filter = function(value)
 {
