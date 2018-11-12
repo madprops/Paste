@@ -1,7 +1,9 @@
 const Paste = {}
 
 Paste.ls_paste_history = "paste_history_v1"
+Paste.ls_mode_history = "mode_history_v1"
 Paste.max_paste_history_items = 200
+Paste.max_mode_history_items = 10
 Paste.filter_delay = 250
 
 Paste.init = function()
@@ -33,6 +35,7 @@ Paste.init = function()
 
 	Paste.remove_get_parameters_from_url()
 	Paste.get_paste_history()
+	Paste.get_mode_history()
 	Paste.check_paste_history()
 	Paste.prepare_modes()
 	Paste.set_default_mode()
@@ -209,18 +212,15 @@ Paste.save_paste_history = function()
 	Paste.save_local_storage(Paste.ls_paste_history, Paste.paste_history)
 }
 
-Paste.check_paste_history = function()
+Paste.push_to_paste_history = function(save=true)
 {
-	if(!Paste.url.trim())
-	{
-		return false
-	}
-
 	let index = Paste.get_paste_history_item_index(Paste.url)
+
+	let obj = {url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name}
 
 	if(index === -1)
 	{
-		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name})
+		Paste.paste_history.items.unshift(obj)
 
 		if(Paste.paste_history.items.length > Paste.max_paste_history_items)
 		{
@@ -231,10 +231,13 @@ Paste.check_paste_history = function()
 	else
 	{
 		Paste.paste_history.items.splice(index, 1)
-		Paste.paste_history.items.unshift({url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name})
+		Paste.paste_history.items.unshift(obj)
 	}
 
-	Paste.save_paste_history()
+	if(save)
+	{
+		Paste.save_paste_history()
+	}
 }
 
 Paste.get_paste_history_item_index = function(url)
@@ -252,6 +255,16 @@ Paste.get_paste_history_item_index = function(url)
 	}
 
 	return -1
+}
+
+Paste.check_paste_history = function()
+{
+	if(!Paste.url.trim())
+	{
+		return false
+	}
+
+	Paste.push_to_paste_history()
 }
 
 Paste.get_sample = function()
@@ -389,7 +402,7 @@ Paste.do_paste_history_filter = function(value)
 Paste.after_filter = function()
 {
 	Paste.update_modal_scrollbar()
-	Paste.modal_inner.scrollTop = 0
+	Paste.scroll_modal_to_top()
 }
 
 Paste.show_modal = function(html)
@@ -398,6 +411,7 @@ Paste.show_modal = function(html)
 	Paste.overlay.style.display = "block"
 	Paste.modal.style.display = "block"
 	Paste.update_modal_scrollbar()
+	Paste.scroll_modal_to_top()
 }
 
 Paste.hide_modal = function()
@@ -405,6 +419,11 @@ Paste.hide_modal = function()
 	Paste.overlay.style.display = "none"
 	Paste.modal.style.display = "none"
 	Paste.editor.focus()
+}
+
+Paste.scroll_modal_to_top = function()
+{
+	Paste.modal_inner.scrollTop = 0
 }
 
 Paste.new_paste = function()
@@ -512,19 +531,17 @@ Paste.prepare_modes = function()
 	
 	let modes_string_array = []
 
-	let pinned = ["JavaScript", "HTML", "CSS", "Python", "Java", "Plain Text"]
-
 	for(let mode of CodeMirror.modeInfo)
 	{
 		Paste.modes_dict[mode.name] = mode.mode
 
-		let pindex = pinned.indexOf(mode.name)
+		let pindex = Paste.get_mode_history_item_index(mode.name)
 
 		let position
 
 		if(pindex === -1)
 		{
-			position = pinned.length
+			position = Object.keys(Paste.mode_history.items).length
 		}
 
 		else
@@ -558,7 +575,12 @@ Paste.do_change_mode = function(name, mode)
 	}
 
 	Paste.mode_text.innerHTML = name
+	
 	Paste.mode_name = name
+
+	Paste.push_to_mode_history()
+
+	Paste.prepare_modes()
 }
 
 Paste.change_mode = function(name, hide_modal=false)
@@ -580,7 +602,15 @@ Paste.change_mode = function(name, hide_modal=false)
 
 Paste.set_default_mode = function()
 {
-	Paste.change_mode(Paste.mode_name)
+	if(Paste.mode_name)
+	{
+		Paste.change_mode(Paste.mode_name)
+	}
+
+	else
+	{
+		Paste.change_mode(Paste.mode_history.items[0].mode_name)
+	}
 }
 
 Paste.remove_non_alphanumeric = function(s)
@@ -609,4 +639,88 @@ Paste.update_modal_scrollbar = function()
 			Paste.modal_scrollbar.update()
 		}
 	}
+}
+
+Paste.get_mode_history = function()
+{
+	Paste.mode_history = Paste.get_local_storage(Paste.ls_mode_history)
+
+	if(Paste.mode_history === null)
+	{
+		Paste.mode_history = {}
+	}
+
+	let changed = false
+
+	if(Paste.mode_history.items === undefined)
+	{
+		let array = 
+		[
+			{mode_name: "Plain Text"},
+			{mode_name: "JavaScript"}, 
+			{mode_name: "HTML"},
+			{mode_name: "CSS"},
+			{mode_name: "Python"},
+			{mode_name: "Java"}
+		]
+
+		Paste.mode_history.items = array
+
+		changed = true
+	}
+
+	if(changed)
+	{
+		Paste.save_mode_history()
+	}
+}
+
+Paste.save_mode_history = function()
+{
+	Paste.save_local_storage(Paste.ls_mode_history, Paste.mode_history)
+}
+
+Paste.push_to_mode_history = function(save=true)
+{
+	let index = Paste.get_mode_history_item_index(Paste.mode_name)
+
+	let obj = {mode_name:Paste.mode_name}
+
+	if(index === -1)
+	{
+		Paste.mode_history.items.unshift(obj)
+
+		if(Paste.mode_history.items.length > Paste.max_mode_history_items)
+		{
+			Paste.mode_history.items.pop()
+		}
+	}
+
+	else
+	{
+		Paste.mode_history.items.splice(index, 1)
+		Paste.mode_history.items.unshift(obj)
+	}
+
+	if(save)
+	{
+		Paste.save_mode_history()
+	}
+}
+
+Paste.get_mode_history_item_index = function(mode_name)
+{
+	let i = 0
+
+	for(let item of Paste.mode_history.items)
+	{
+		if(item.mode_name === mode_name)
+		{
+			return i
+		}
+
+		i += 1
+	}
+
+	return -1
 }

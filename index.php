@@ -21,7 +21,7 @@
 		$content = "";
 		$title = "Paste";
 		$revision = 1;
-		$mode_name = "Plain Text";
+		$mode_name = "";
 	}
 
 	else
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/perfect-scrollbar.min.js'></script>
-	<script src='/base.js?version=21'></script>
+	<script src='/base.js?version=22'></script>
 	<script>
 		window.onload = function()
 		{
