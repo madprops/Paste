@@ -5,6 +5,7 @@ Paste.ls_mode_history = "mode_history_v1"
 Paste.max_paste_history_items = 200
 Paste.max_mode_history_items = 20
 Paste.filter_delay = 250
+Paste.default_mode = "Plain Text"
 Paste.modal_type = ""
 
 Paste.init = function()
@@ -497,6 +498,7 @@ Paste.new_paste = function()
 	else
 	{
 		Paste.document.setValue("")
+		Paste.change_mode(Paste.default_mode)
 		Paste.editor.focus()
 	}
 }
@@ -583,6 +585,11 @@ Paste.prepare_modes = function()
 
 Paste.do_change_mode = function(name, mode)
 {
+	if(name === Paste.mode_name)
+	{
+		return false
+	}
+	
 	Paste.editor.setOption("mode", mode)
 
 	Paste.mode_text.innerHTML = name
@@ -620,7 +627,7 @@ Paste.set_default_mode = function()
 
 	else
 	{
-		Paste.change_mode("Plain Text")
+		Paste.change_mode(Paste.default_mode)
 	}
 }
 
