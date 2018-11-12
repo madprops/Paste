@@ -348,7 +348,7 @@ Paste.show_paste_history = function()
 	{
 		let item = Paste.paste_history.items[i]
 
-		s += `<a class='paste_history_item paste_unselectable' href='${item.url}'>`
+		s += `<a class='modal_item paste_history_item paste_unselectable' href='${item.url}'>`
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
 
 		if(item.mode_name)
@@ -381,6 +381,11 @@ Paste.setup_modal = function()
 				Paste.modal_filter.value = ""
 			}
 		}
+
+		if(e.key === "Enter")
+		{
+			Paste.click_first_modal_item()
+		}
 		
 		Paste.modal_filter_timer(Paste.modal_filter.value.trim())
 	})
@@ -389,6 +394,20 @@ Paste.setup_modal = function()
 	{
 		Paste.scroll_modal_to_top()
 	})
+}
+
+Paste.click_first_modal_item = function()
+{
+	let items = Array.from(document.querySelectorAll(".modal_item"))
+
+	for(let item of items)
+	{
+		if(item.style.display !== "none")
+		{
+			item.click()
+			return
+		}
+	}
 }
 
 Paste.modal_filter_timer = (function(value)
@@ -444,6 +463,7 @@ Paste.after_filter = function()
 
 Paste.show_modal = function(html, title)
 {
+	Paste.modal_filter.value = ""
 	Paste.modal_titlebar_inner.innerHTML = title
 	Paste.modal_inner.innerHTML = html
 	Paste.overlay.style.display = "block"
@@ -550,7 +570,7 @@ Paste.prepare_modes = function()
 			position = pindex
 		}
 
-		modes_string_array.push({position:position, string:`<div class='paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`})
+		modes_string_array.push({position:position, string:`<div class='modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`})
 	}
 
 	modes_string_array.sort(function(a, b) 
