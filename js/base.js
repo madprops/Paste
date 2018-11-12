@@ -387,15 +387,7 @@ Paste.setup_modal = function()
 
 	Paste.modal_titlebar_inner.addEventListener("click", function()
 	{
-		if(Paste.modal_type === "Paste History")
-		{
-			Paste.show_mode_selector()
-		}
-
-		else if(Paste.modal_type === "Language Mode")
-		{
-			Paste.show_paste_history()
-		}
+		Paste.scroll_modal_to_top()
 	})
 }
 
