@@ -585,11 +585,6 @@ Paste.prepare_modes = function()
 
 Paste.do_change_mode = function(name, mode)
 {
-	if(name === Paste.mode_name)
-	{
-		return false
-	}
-	
 	Paste.editor.setOption("mode", mode)
 
 	Paste.mode_text.innerHTML = name
