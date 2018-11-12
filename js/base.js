@@ -48,7 +48,8 @@ Paste.create_editor = function()
 		indentWithTabs: true,
 		scrollbarStyle: "simple",
 		tabSize: 4,
-		lineWrapping: true
+		lineWrapping: true,
+		indentUnit: 4
 	})
 }
 
