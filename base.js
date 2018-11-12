@@ -302,7 +302,7 @@ Paste.show_history = function()
 	{
 		let item = Paste.paste_history.items[i]
 
-		s += `<a class='paste_history_item' href='${item.url}'>`
+		s += `<a class='paste_history_item paste_unselectable' href='${item.url}'>`
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
 
 		if(item.mode_name)
@@ -428,7 +428,7 @@ Paste.show_mode_selector = function()
 	s += "<div class='spacer1'></div>"
 	s += "<div class='spacer1'></div>"
 
-	s += "<div id='paste_mode_selector_container'>"
+	s += "<div id='paste_mode_selector_container' class='paste_unselectable'>"
 	s += Paste.modes_string
 	s += "</div>"
 
