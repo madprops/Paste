@@ -75,7 +75,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=12'>
+	<link rel='stylesheet' href='/css/style.css?version=13'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=28'></script>
+	<script src='/js/base.js?version=29'></script>
 	<script>
 		window.onload = function()
 		{
@@ -110,7 +110,7 @@
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
 				<span class='paste_toolbar_button'>Copy URL</span>
 			</div>
-			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_history()'>
+			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_paste_history()'>
 				<span class='paste_toolbar_button'>Paste History</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_mode_selector()'>
@@ -123,7 +123,9 @@
 	</div>
 	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
 	<div id='paste_modal'>
-		<div id='paste_modal_titlebar' class='paste_unselectable'></div>
+		<div id='paste_modal_titlebar' class='paste_unselectable'>
+			<div id='paste_modal_titlebar_inner'></div>
+		</div>
 		<div id='paste_modal_filter_container'>
 			<input type='text' id='paste_modal_filter' placeholder='Filter'>
 		</div>

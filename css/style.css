@@ -172,6 +172,11 @@ body, html
 	justify-content: center;
 }
 
+#paste_modal_titlebar_inner
+{
+	cursor: pointer;
+}
+
 #paste_modal_filter_container
 {
 	text-align: center;

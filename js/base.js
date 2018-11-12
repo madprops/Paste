@@ -13,7 +13,7 @@ Paste.init = function()
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
-	Paste.modal_titlebar = document.getElementById("paste_modal_titlebar")
+	Paste.modal_titlebar_inner = document.getElementById("paste_modal_titlebar_inner")
 	Paste.modal_filter = document.getElementById("paste_modal_filter")
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
@@ -38,7 +38,7 @@ Paste.init = function()
 	Paste.prepare_modes()
 	Paste.set_default_mode()
 	Paste.start_scrollbars()
-	Paste.setup_modal_filter()
+	Paste.setup_modal()
 	Paste.editor.refresh()
 	Paste.editor.focus()
 }
@@ -338,7 +338,7 @@ Paste.save_local_storage = function(ls_name, obj)
 	localStorage.setItem(ls_name, obj)
 }
 
-Paste.show_history = function()
+Paste.show_paste_history = function()
 {
 	let s = ""
 
@@ -365,7 +365,7 @@ Paste.show_history = function()
 	Paste.show_modal(s, "Paste History")
 }
 
-Paste.setup_modal_filter = function()
+Paste.setup_modal = function()
 {
 	Paste.modal_filter.addEventListener("keyup", function(e)
 	{
@@ -383,6 +383,19 @@ Paste.setup_modal_filter = function()
 		}
 		
 		Paste.modal_filter_timer(Paste.modal_filter.value.trim())
+	})
+
+	Paste.modal_titlebar_inner.addEventListener("click", function()
+	{
+		if(Paste.modal_type === "Paste History")
+		{
+			Paste.show_mode_selector()
+		}
+
+		else if(Paste.modal_type === "Language Mode")
+		{
+			Paste.show_paste_history()
+		}
 	})
 }
 
@@ -439,7 +452,7 @@ Paste.after_filter = function()
 
 Paste.show_modal = function(html, title)
 {
-	Paste.modal_titlebar.innerHTML = title
+	Paste.modal_titlebar_inner.innerHTML = title
 	Paste.modal_inner.innerHTML = html
 	Paste.overlay.style.display = "block"
 	Paste.modal.style.display = "flex"
