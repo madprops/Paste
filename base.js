@@ -15,16 +15,7 @@ Paste.init = function()
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
 	Paste.mode_text = document.getElementById("paste_mode_text")
-
-	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
-	{
-		lineNumbers: true,
-		theme: "dracula",
-		indentWithTabs: true,
-		scrollbarStyle: "simple",
-		tabSize: 4
-	})
-
+	Paste.create_editor()
 	Paste.document = Paste.editor.getDoc()
 	Paste.document.setValue(Paste.initial_value)
 
@@ -42,6 +33,19 @@ Paste.init = function()
 	Paste.editor.refresh()
 	Paste.editor.focus()
 	Paste.start_scrollbars()
+}
+
+Paste.create_editor = function()
+{
+	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
+	{
+		lineNumbers: true,
+		theme: "dracula",
+		indentWithTabs: true,
+		scrollbarStyle: "simple",
+		tabSize: 4,
+		lineWrapping: true
+	})
 }
 
 Paste.clear_textarea = function()
@@ -563,16 +567,6 @@ Paste.prepare_modes = function()
 Paste.do_change_mode = function(name, mode)
 {
 	Paste.editor.setOption("mode", mode)
-	
-	if(mode === "null")
-	{
-		Paste.editor.setOption("lineWrapping", true)
-	}
-
-	else
-	{
-		Paste.editor.setOption("lineWrapping", false)
-	}
 
 	Paste.mode_text.innerHTML = name
 	
@@ -609,7 +603,7 @@ Paste.set_default_mode = function()
 
 	else
 	{
-		Paste.change_mode(Paste.mode_history.items[0].mode_name)
+		Paste.change_mode("Plain Text")
 	}
 }
 
