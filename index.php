@@ -74,8 +74,8 @@
 	<link rel='stylesheet' href='/codemirror/lib/codemirror.css'>
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
-	<link rel='stylesheet' href='/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/style.css?version=11'>
+	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
+	<link rel='stylesheet' href='/css/style.css?version=11'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -84,8 +84,8 @@
 	<script src='/codemirror/mode/mode_bundle_min.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
-	<script src='/perfect-scrollbar.min.js'></script>
-	<script src='/base.js?version=25'></script>
+	<script src='/js/perfect-scrollbar.min.js'></script>
+	<script src='/js/base.js?version=25'></script>
 	<script>
 		window.onload = function()
 		{
@@ -126,8 +126,8 @@
 		<div id='paste_modal_inner'></div>
 	</div>
 	<div id='paste_footer' class='paste_unselectable'></div>
-	<audio id='paste_audio_nope' src='nope.mp3?version=1'>
-	<audio id='paste_audio_succ' src='succ.mp3?version=1'>
-	<audio id='paste_audio_succ2' src='succ2.mp3?version=1'>
+	<audio id='paste_audio_nope' src='/audio/nope.mp3?version=1'>
+	<audio id='paste_audio_succ' src='/audio/succ.mp3?version=1'>
+	<audio id='paste_audio_succ2' src='/audio/succ2.mp3?version=1'>
 </body>
 </html>
