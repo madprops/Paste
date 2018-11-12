@@ -3,7 +3,7 @@ const Paste = {}
 Paste.ls_paste_history = "paste_history_v1"
 Paste.ls_mode_history = "mode_history_v1"
 Paste.max_paste_history_items = 200
-Paste.max_mode_history_items = 10
+Paste.max_mode_history_items = 20
 Paste.filter_delay = 250
 Paste.modal_type = ""
 

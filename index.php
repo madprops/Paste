@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=27'></script>
+	<script src='/js/base.js?version=28'></script>
 	<script>
 		window.onload = function()
 		{
@@ -123,7 +123,7 @@
 	</div>
 	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
 	<div id='paste_modal'>
-		<div id='paste_modal_titlebar'></div>
+		<div id='paste_modal_titlebar' class='paste_unselectable'></div>
 		<div id='paste_modal_filter_container'>
 			<input type='text' id='paste_modal_filter' placeholder='Filter'>
 		</div>
