@@ -148,9 +148,17 @@ Paste.copy_to_clipboard = function(s)
 
 Paste.copy_url = function()
 {
-	Paste.copy_to_clipboard(window.location.href)
-	Paste.show_footer_message("URL Copied To Clipboard")
-	Paste.editor.focus()
+	if(!Paste.url)
+	{
+		Paste.show_footer_message("This Is Not A Saved Paste")
+	}
+
+	else
+	{
+		Paste.copy_to_clipboard(window.location.href)
+		Paste.show_footer_message("URL Copied To Clipboard")
+		Paste.editor.focus()
+	}
 }
 
 Paste.show_footer_message = function(s)
