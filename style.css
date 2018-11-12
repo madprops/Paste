@@ -269,6 +269,7 @@ a.paste_history_item:hover .paste_history_item_sample
 	box-shadow: 0 0 5px black;
 	border: 0;
 	outline: none;
+	padding: 0.2rem;
 }
 
 #paste_textarea
