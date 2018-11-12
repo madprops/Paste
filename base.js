@@ -15,13 +15,17 @@ Paste.init = function()
 	Paste.modal_inner = document.getElementById("paste_modal_inner")
 	Paste.overlay = document.getElementById("paste_overlay")
 	Paste.mode_text = document.getElementById("paste_mode_text")
+	Paste.audio_nope = document.getElementById("paste_audio_nope")
+	Paste.audio_succ = document.getElementById("paste_audio_succ")
+	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
 	Paste.create_editor()
 	Paste.document = Paste.editor.getDoc()
 	Paste.document.setValue(Paste.initial_value)
 
 	if(Paste.saved)
 	{
-		Paste.show_footer_message("Paste Succesfully Saved")
+		Paste.show_footer_message("Paste Succesfully Saved", true)
+		Paste.play_audio("succ")
 	}
 
 	Paste.remove_get_parameters_from_url()
@@ -61,19 +65,22 @@ Paste.save_paste = function()
 
 	if(!content.trim())
 	{
-		Paste.show_footer_message("Can't Save An Empty Paste")
+		Paste.show_footer_message("Can't Save An Empty Paste", false)
+		Paste.play_audio("nope")
 		return false
 	}
 
 	if(content === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
 	{
-		Paste.show_footer_message("Nothing Has Changed")
+		Paste.show_footer_message("Nothing Has Changed", false)
+		Paste.play_audio("nope")
 		return false
 	}
 
 	if(Paste.posting)
 	{
-		Paste.show_footer_message("Paste Save Already In Progress")
+		Paste.show_footer_message("Paste Save Already In Progress", false)
+		Paste.play_audio("nope")
 		return false
 	}
 
@@ -157,22 +164,34 @@ Paste.copy_url = function()
 {
 	if(!Paste.url)
 	{
-		Paste.show_footer_message("This Is Not A Saved Paste")
+		Paste.show_footer_message("This Is Not A Saved Paste", false)
+		Paste.play_audio("nope")
 	}
 
 	else
 	{
 		Paste.copy_to_clipboard(window.location.href)
-		Paste.show_footer_message("URL Copied To Clipboard")
+		Paste.show_footer_message("URL Copied To Clipboard", true)
+		Paste.play_audio("succ2")
 		Paste.editor.focus()
 	}
 }
 
-Paste.show_footer_message = function(s)
+Paste.show_footer_message = function(s, succ)
 {
 	clearTimeout(Paste.footer_timeout)
 
 	Paste.footer.innerHTML = s
+
+	if(succ)
+	{
+		Paste.footer.style.backgroundColor = "#5bab70"
+	}
+
+	else
+	{
+		Paste.footer.style.backgroundColor = "#c05f5f"
+	}
 
 	Paste.footer.style.bottom = "0"
 
@@ -717,4 +736,12 @@ Paste.get_mode_history_item_index = function(mode_name)
 	}
 
 	return -1
+}
+
+Paste.play_audio = function(type)
+{
+	let el = Paste[`audio_${type}`]
+	el.pause()
+	el.currentTime = 0
+	el.play()
 }
