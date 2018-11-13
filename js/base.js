@@ -377,8 +377,9 @@ Paste.make_paste_history_string = function()
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
 		s += `</a>`
 	
-		s += "<div class='spacer1'></div>"
 	}
+	
+	s += "<div class='spacer1'></div>"
 
 	Paste.paste_history_string = s
 }
