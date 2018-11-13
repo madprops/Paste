@@ -383,10 +383,20 @@ Paste.show_paste_history = function()
 	Paste.show_modal(s, "Paste History")
 }
 
-Paste.on_modal_item_mouseenter = function(el)
-{
+Paste.highlight_modal_item = function(el, scroll=false)
+{	
 	Paste.remove_modal_item_highlight()
 	el.classList.add("paste_modal_item_highlighted")
+
+	if(scroll)
+	{
+		el.scrollIntoView({block:"center"})
+	}
+}
+
+Paste.on_modal_item_mouseenter = function(el)
+{
+	Paste.highlight_modal_item(el)
 }
 
 Paste.setup_modal = function()
@@ -496,14 +506,9 @@ Paste.get_modal_items = function()
 
 Paste.highlight_first_modal_item = function()
 {
-	Paste.remove_modal_item_highlight()
-
 	let item = Paste.get_first_visible_modal_item()
 
-	if(item)
-	{
-		item.classList.add("paste_modal_item_highlighted")
-	}
+	Paste.highlight_modal_item(item)
 }
 
 Paste.show_modal = function(html, title)
@@ -916,10 +921,7 @@ Paste.modal_item_up = function()
 
 	if(nindex < items.length)
 	{
-		Paste.remove_modal_item_highlight()
-
-		items[nindex].classList.add("paste_modal_item_highlighted")
-		items[nindex].scrollIntoView({block:"center"})
+		Paste.highlight_modal_item(items[nindex], true)
 	}
 }
 
@@ -951,10 +953,7 @@ Paste.modal_item_down = function()
 
 	if(nindex < items.length)
 	{
-		Paste.remove_modal_item_highlight()
-
-		items[nindex].classList.add("paste_modal_item_highlighted")
-		items[nindex].scrollIntoView({block:"center"})
+		Paste.highlight_modal_item(items[nindex], true)
 	}
 }
 
