@@ -86,7 +86,7 @@ Paste.save_paste = function()
 		return false
 	}
 
-	if(content === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
+	if(!Paste.paste_is_modified())
 	{
 		Paste.show_footer_message("Nothing Has Changed", false)
 		Paste.play_audio("nope")
@@ -159,7 +159,7 @@ Paste.send_post = function(target, data)
 					
 					if(url)
 					{
-						window.location.href = `${url}?saved=true`
+						Paste.go_to_location(`${url}?saved=true`)
 					}
 				}
 			}
@@ -533,11 +533,16 @@ Paste.scroll_modal_to_top = function()
 	Paste.modal_inner.scrollTop = 0
 }
 
+Paste.go_to_location = function(url)
+{
+	window.location.href = url
+}
+
 Paste.new_paste = function()
 {
 	if(Paste.url)
 	{
-		window.location.href = "/"		
+		Paste.go_to_location("/")
 	}
 
 	else
@@ -951,4 +956,14 @@ Paste.modal_item_down = function()
 		items[nindex].classList.add("paste_modal_item_highlighted")
 		items[nindex].scrollIntoView({block:"center"})
 	}
+}
+
+Paste.paste_is_modified = function()
+{
+	if(Paste.document.getValue() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
+	{
+		return false
+	}
+
+	return true
 }
