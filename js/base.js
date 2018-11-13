@@ -356,7 +356,7 @@ Paste.save_local_storage = function(ls_name, obj)
 	localStorage.setItem(ls_name, obj)
 }
 
-Paste.show_paste_history = function()
+Paste.make_paste_history_string = function()
 {
 	let s = ""
 
@@ -376,11 +376,21 @@ Paste.show_paste_history = function()
 		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
 		s += `</a>`
+	
+		s += "<div class='spacer1'></div>"
 	}
 
-	s += "<div class='spacer1'></div>"
+	Paste.paste_history_string = s
+}
 
-	Paste.show_modal(s, "Paste History")
+Paste.show_paste_history = function()
+{
+	if(!Paste.paste_history_string)
+	{
+		Paste.make_paste_history_string()
+	}
+
+	Paste.show_modal(Paste.paste_history_string, "Paste History")
 }
 
 Paste.highlight_modal_item = function(el, scroll=false)
@@ -613,7 +623,10 @@ Paste.prepare_modes = function()
 		obj.position = 0
 		obj.mode = mode.mode
 		obj.name = mode.name
-		obj.string = `<div class='paste_modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)" onmouseenter="Paste.on_modal_item_mouseenter(this)">${mode.name}</div>`
+		obj.string = `
+		<div class='paste_modal_item paste_mode_selector_item' 
+		onclick="Paste.change_mode('${mode.name}', true)" 
+		onmouseenter="Paste.on_modal_item_mouseenter(this)">${mode.name}</div>`
 		
 		Paste.modes_array.push(obj)
 	}
