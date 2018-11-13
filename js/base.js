@@ -364,7 +364,7 @@ Paste.show_paste_history = function()
 	{
 		let item = Paste.paste_history.items[i]
 
-		s += `<a class='modal_item paste_history_item paste_unselectable' href='${item.url}'>`
+		s += `<a class='paste_modal_item paste_history_item paste_unselectable' href='${item.url}'>`
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
 
 		if(item.mode_name)
@@ -414,7 +414,7 @@ Paste.setup_modal = function()
 
 Paste.click_first_modal_item = function()
 {
-	let items = Array.from(document.querySelectorAll(".modal_item"))
+	let items = Array.from(document.querySelectorAll(".paste_modal_item"))
 
 	for(let item of items)
 	{
@@ -573,7 +573,7 @@ Paste.prepare_modes = function()
 		obj.position = 0
 		obj.mode = mode.mode
 		obj.name = mode.name
-		obj.string = `<div class='modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
+		obj.string = `<div class='paste_modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
 		
 		Paste.modes_array.push(obj)
 	}
