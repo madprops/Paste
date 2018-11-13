@@ -806,6 +806,17 @@ Paste.trigger_filter = function()
 
 Paste.activate_key_detection = function()
 {
+	document.addEventListener("keydown", function(e)
+	{
+		if(Paste.modal_type)
+		{
+			if(document.activeElement !== Paste.modal_filter)
+			{
+				Paste.modal_filter.focus()
+			}
+		}
+	})
+
 	document.addEventListener("keyup", function(e)
 	{
 		if(Paste.modal_type)
