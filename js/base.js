@@ -564,56 +564,64 @@ Paste.do_mode_selector_filter = function(value)
 
 Paste.prepare_modes = function()
 {
-	Paste.modes_string = ""
-	Paste.modes_dict = {}
-	
-	let modes_string_array = []
+	Paste.modes_array = []
 
 	for(let mode of CodeMirror.modeInfo)
 	{
-		Paste.modes_dict[mode.name] = mode.mode
+		let obj = {}
 
-		let pindex = Paste.get_mode_history_item_index(mode.name)
+		obj.position = 0
+		obj.mode = mode.mode
+		obj.name = mode.name
+		obj.string = `<div class='modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
+		
+		Paste.modes_array.push(obj)
+	}
+}
 
-		let position
+Paste.order_modes = function()
+{
+	let mode_history_length = Paste.mode_history.items.length
 
-		if(pindex === -1)
-		{
-			position = Object.keys(Paste.mode_history.items).length
-		}
-
-		else
-		{
-			position = pindex
-		}
-
-		modes_string_array.push({position:position, string:`<div class='modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`})
+	for(let mode of Paste.modes_array)
+	{
+		let index = Paste.get_mode_history_item_index(mode.name)
+		mode.position = index > -1 ? index : mode_history_length
 	}
 
-	modes_string_array.sort(function(a, b) 
+	Paste.modes_array.sort(function(a, b) 
 	{
 		return a.position - b.position
 	})
 
-	Paste.modes_string = modes_string_array.map(e => e.string).join("")
+	Paste.modes_string = Paste.modes_array.map(m => m.string).join("")
 }
 
 Paste.do_change_mode = function(name, mode)
 {
 	Paste.editor.setOption("mode", mode)
-
 	Paste.mode_text.innerHTML = name
-	
 	Paste.mode_name = name
-
 	Paste.push_to_mode_history()
+	Paste.order_modes()
+}
 
-	Paste.prepare_modes()
+Paste.get_mode_by_name = function(name)
+{
+	for(let mode of Paste.modes_array)
+	{
+		if(mode.name === name)
+		{
+			return mode.mode
+		}
+	}
+
+	return false
 }
 
 Paste.change_mode = function(name, hide_modal=false)
 {
-	let mode = Paste.modes_dict[name]
+	let mode = Paste.get_mode_by_name(name)
 
 	if(!mode)
 	{
