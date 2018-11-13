@@ -252,7 +252,7 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 .paste_history_item_mode_name
 {
 	padding-top: 0.5rem;
-	padding-bottom: 0.5rem;
+	padding-bottom: 0.8rem;
 	text-align: center;
 	font-size: 1rem;
 	color: white;
