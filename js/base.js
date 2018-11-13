@@ -41,6 +41,8 @@ Paste.init = function()
 	Paste.set_default_mode()
 	Paste.start_scrollbars()
 	Paste.setup_modal()
+	Paste.activate_key_detection()
+
 	Paste.editor.refresh()
 	Paste.editor.focus()
 }
@@ -364,7 +366,7 @@ Paste.show_paste_history = function()
 	{
 		let item = Paste.paste_history.items[i]
 
-		s += `<a class='paste_modal_item paste_history_item paste_unselectable' href='${item.url}'>`
+		s += `<a class='paste_modal_item paste_history_item paste_unselectable' href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
 
 		if(item.mode_name)
@@ -381,38 +383,21 @@ Paste.show_paste_history = function()
 	Paste.show_modal(s, "Paste History")
 }
 
+Paste.on_modal_item_mouseenter = function(el)
+{
+	Paste.remove_modal_item_highlight()
+	el.classList.add("paste_modal_item_highlighted")
+}
+
 Paste.setup_modal = function()
 {
-	Paste.modal_filter.addEventListener("keyup", function(e)
-	{
-		if(e.key === "Escape")
-		{
-			if(Paste.modal_filter.value === "")
-			{
-				Paste.hide_modal()
-			}
-
-			else
-			{
-				Paste.modal_filter.value = ""
-			}
-		}
-
-		if(e.key === "Enter")
-		{
-			Paste.click_first_modal_item()
-		}
-		
-		Paste.modal_filter_timer(Paste.modal_filter.value.trim())
-	})
-
 	Paste.modal_titlebar_inner.addEventListener("click", function()
 	{
 		Paste.scroll_modal_to_top()
 	})
 }
 
-Paste.click_first_modal_item = function()
+Paste.get_first_visible_modal_item = function()
 {
 	let items = Array.from(document.querySelectorAll(".paste_modal_item"))
 
@@ -420,9 +405,25 @@ Paste.click_first_modal_item = function()
 	{
 		if(item.style.display !== "none")
 		{
-			item.click()
-			return
+			return item
 		}
+	}
+
+	return false
+}
+
+Paste.get_highlighted_modal_item = function()
+{
+	return document.querySelector(".paste_modal_item_highlighted")
+}
+
+Paste.click_highlighted_modal_item = function()
+{
+	let item = Paste.get_highlighted_modal_item()
+
+	if(item)
+	{
+		item.click()
 	}
 }
 
@@ -475,6 +476,34 @@ Paste.after_filter = function()
 {
 	Paste.update_modal_scrollbar()
 	Paste.scroll_modal_to_top()
+	Paste.highlight_first_modal_item()
+}
+
+Paste.remove_modal_item_highlight = function()
+{
+	let el = Paste.get_highlighted_modal_item()
+
+	if(el)
+	{
+		el.classList.remove("paste_modal_item_highlighted")
+	}
+}
+
+Paste.get_modal_items = function()
+{
+	return Array.from(document.querySelectorAll(".paste_modal_item"))
+}
+
+Paste.highlight_first_modal_item = function()
+{
+	Paste.remove_modal_item_highlight()
+
+	let item = Paste.get_first_visible_modal_item()
+
+	if(item)
+	{
+		item.classList.add("paste_modal_item_highlighted")
+	}
 }
 
 Paste.show_modal = function(html, title)
@@ -488,6 +517,7 @@ Paste.show_modal = function(html, title)
 	Paste.scroll_modal_to_top()
 	Paste.modal_filter.focus()
 	Paste.modal_type = title
+	Paste.highlight_first_modal_item()
 }
 
 Paste.hide_modal = function()
@@ -573,7 +603,7 @@ Paste.prepare_modes = function()
 		obj.position = 0
 		obj.mode = mode.mode
 		obj.name = mode.name
-		obj.string = `<div class='paste_modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)">${mode.name}</div>`
+		obj.string = `<div class='paste_modal_item paste_mode_selector_item' onclick="Paste.change_mode('${mode.name}', true)" onmouseenter="Paste.on_modal_item_mouseenter(this)">${mode.name}</div>`
 		
 		Paste.modes_array.push(obj)
 	}
@@ -767,4 +797,147 @@ Paste.play_audio = function(type)
 	el.pause()
 	el.currentTime = 0
 	el.play()
+}
+
+Paste.trigger_filter = function()
+{
+	Paste.modal_filter_timer(Paste.modal_filter.value.trim())
+}
+
+Paste.activate_key_detection = function()
+{
+	document.addEventListener("keyup", function(e)
+	{
+		if(Paste.modal_type)
+		{
+			if(e.key === "Escape")
+			{
+				if(Paste.modal_filter.value === "")
+				{
+					Paste.hide_modal()
+				}
+
+				else
+				{
+					Paste.modal_filter.value = ""
+					Paste.trigger_filter()
+				}
+			}
+
+			else if(e.key === "Enter")
+			{
+				Paste.click_highlighted_modal_item()
+			}
+
+			else if(e.key === "ArrowUp")
+			{
+				Paste.modal_item_up()
+			}
+
+			else if(e.key === "ArrowDown")
+			{
+				Paste.modal_item_down()
+			}
+			
+			else
+			{
+				Paste.trigger_filter()
+			}
+		}
+
+		else
+		{
+			if(e.key === "Escape")
+			{
+				Paste.show_paste_history()
+			}
+		}
+	})
+}
+
+Paste.get_visible_modal_items = function()
+{
+	let visible = []
+
+	let items = Array.from(document.querySelectorAll(".paste_modal_item"))
+
+	for(item of items)
+	{
+		if(item.style.display !== "none")
+		{
+			visible.push(item)
+		}
+	}
+
+	return visible
+}
+
+Paste.modal_item_up = function()
+{
+	let items = Paste.get_visible_modal_items().slice(0).reverse()
+
+	let index = -1
+
+	let i = 0
+
+	for(let item of items)
+	{
+		if(item.classList.contains("paste_modal_item_highlighted"))
+		{
+			index = i
+			break
+		}
+
+		i += 1
+	}
+
+	if(index === -1)
+	{
+		return false
+	}
+
+	let nindex = index + 1
+
+	if(nindex < items.length)
+	{
+		Paste.remove_modal_item_highlight()
+
+		items[nindex].classList.add("paste_modal_item_highlighted")
+		items[nindex].scrollIntoView({block:"center"})
+	}
+}
+
+Paste.modal_item_down = function()
+{
+	let items = Paste.get_visible_modal_items()
+
+	let index = -1
+
+	let i = 0
+
+	for(let item of items)
+	{
+		if(item.classList.contains("paste_modal_item_highlighted"))
+		{
+			index = i
+			break
+		}
+
+		i += 1
+	}
+
+	if(index === -1)
+	{
+		return false
+	}
+
+	let nindex = index + 1
+
+	if(nindex < items.length)
+	{
+		Paste.remove_modal_item_highlight()
+
+		items[nindex].classList.add("paste_modal_item_highlighted")
+		items[nindex].scrollIntoView({block:"center"})
+	}
 }

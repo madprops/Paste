@@ -75,7 +75,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=14'>
+	<link rel='stylesheet' href='/css/style.css?version=15'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=37'></script>
+	<script src='/js/base.js?version=38'></script>
 	<script>
 		window.onload = function()
 		{

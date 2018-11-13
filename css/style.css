@@ -215,6 +215,16 @@ body, html
 	overflow-y: auto;
 }
 
+.paste_modal_item
+{
+	padding: 1rem;
+}
+
+.paste_modal_item_highlighted
+{
+	box-shadow: 0 0 10px black;
+}
+
 .spacer1
 {
 	padding-top: 0.5rem;
@@ -228,18 +238,8 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 	color: black;
 	font-size: 1.2rem;
 	text-decoration: none;
-	margin-bottom: 3rem;
+	margin-bottom: 2rem;
 	width: 80%;
-}
-
-a.paste_history_item:hover .paste_history_item_url
-{
-	font-weight: bold;
-}
-
-a.paste_history_item:hover .paste_history_item_sample
-{
-	box-shadow: 0 0 10px black;
 }
 
 .paste_history_item_url
@@ -247,7 +247,6 @@ a.paste_history_item:hover .paste_history_item_sample
 	color: white;
 	font-size: 1.2rem;
 	text-align: center;
-	transition: text-shadow 250ms;
 }
 
 .paste_history_item_mode_name
@@ -266,7 +265,6 @@ a.paste_history_item:hover .paste_history_item_sample
 	color: white;
 	text-align: center;
 	padding: 0.5rem;
-	transition: box-shadow 250ms;
 	overflow-wrap: break-word;
 }
 
@@ -286,16 +284,9 @@ a.paste_history_item:hover .paste_history_item_sample
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 100%;
 	padding-top: 0.8rem;
 	padding-bottom: 0.8rem;
 	margin-bottom: 1rem;
-	transition: box-shadow 250ms;
-}
-
-.paste_mode_selector_item:hover
-{
-	box-shadow: 0 0 10px black;
 }
 
 #paste_textarea
