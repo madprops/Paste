@@ -36,6 +36,8 @@ function random_word($length = 4)
 	return $string;
 }
 
+$max_content_size = 500000;
+
 // Create a new database, if the file doesn't exist and open it for reading/writing.
 // The extension of the file is arbitrary.
 $db = new SQLite3('pastes_v3.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
@@ -60,6 +62,13 @@ if(isset($_POST["content"]))
 }
 
 else
+{
+	exit();
+}
+
+$content_length = strlen($content);
+
+if($content_length === 0 || $content_length > $max_content_size)
 {
 	exit();
 }

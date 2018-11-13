@@ -7,6 +7,7 @@ Paste.max_mode_history_items = 20
 Paste.filter_delay = 250
 Paste.default_mode = "Plain Text"
 Paste.modal_type = ""
+Paste.max_content_size = 500000
 
 Paste.init = function()
 {
@@ -72,6 +73,13 @@ Paste.save_paste = function()
 	if(!content.trim())
 	{
 		Paste.show_footer_message("Can't Save An Empty Paste", false)
+		Paste.play_audio("nope")
+		return false
+	}
+
+	if(content.length > Paste.max_content_size)
+	{
+		Paste.show_footer_message("Paste Is Too Big", false)
 		Paste.play_audio("nope")
 		return false
 	}
@@ -143,8 +151,15 @@ Paste.send_post = function(target, data)
 		{
 			if(XHR.status == 200)
 			{
-				let url = XHR.response["url"]
-				window.location.href = `${url}?saved=true`
+				if(XHR.response)
+				{
+					let url = XHR.response["url"]
+					
+					if(url)
+					{
+						window.location.href = `${url}?saved=true`
+					}
+				}
 			}
 		}
 	}
