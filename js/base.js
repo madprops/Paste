@@ -12,6 +12,7 @@ Paste.max_content_size = 500000
 Paste.init = function()
 {
 	Paste.main = document.getElementById("paste_main")
+	Paste.content_main = document.getElementById("paste_content_main")
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
@@ -23,9 +24,8 @@ Paste.init = function()
 	Paste.audio_nope = document.getElementById("paste_audio_nope")
 	Paste.audio_succ = document.getElementById("paste_audio_succ")
 	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
+	
 	Paste.create_editor()
-	Paste.document = Paste.editor.getDoc()
-	Paste.document.setValue(Paste.initial_value)
 
 	if(Paste.saved)
 	{
@@ -42,9 +42,15 @@ Paste.init = function()
 	Paste.start_scrollbars()
 	Paste.setup_modal()
 	Paste.activate_key_detection()
+	Paste.remove_content_background()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
+}
+
+Paste.remove_content_background = function()
+{
+	Paste.content_main.style.backgroundColor = "transparent"
 }
 
 Paste.create_editor = function()
@@ -59,6 +65,9 @@ Paste.create_editor = function()
 		lineWrapping: true,
 		indentUnit: 4
 	})
+
+	Paste.document = Paste.editor.getDoc()
+	Paste.document.setValue(Paste.initial_value)
 }
 
 Paste.clear_textarea = function()

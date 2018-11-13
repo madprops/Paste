@@ -83,6 +83,7 @@ body, html
 	top: 3rem;
 	bottom: 0;
 	width: 100%;
+	background-color: #262833;
 }
 
 .CodeMirror
