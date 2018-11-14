@@ -63,8 +63,7 @@ Paste.init = function()
 
 	if(Paste.saved)
 	{
-		Paste.show_footer_message("Paste Succesfully Saved - URL Has Been Copied To The Clipboard", true)
-		Paste.copy_url()
+		Paste.show_footer_message("Paste Succesfully Saved", true)
 		Paste.play_audio("succ")
 	}
 
@@ -237,6 +236,19 @@ Paste.copy_to_clipboard = function(s)
 
 Paste.copy_url = function()
 {
+	if(!Paste.url)
+	{
+		Paste.show_footer_message("This Is Not A Saved Paste", false)
+		Paste.play_audio("nope")
+	}
+ 	else
+	{
+		Paste.copy_to_clipboard(window.location.href)
+		Paste.show_footer_message("URL Copied To Clipboard", true)
+		Paste.play_audio("succ2")
+		Paste.editor.focus()
+	}
+	
 	Paste.copy_to_clipboard(window.location.href)
 }
 

@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=48'></script>
+	<script src='/js/base.js?version=49'></script>
 	<script>
 		window.onload = function()
 		{
@@ -103,6 +103,9 @@
 		<div id='paste_toolbar' class='paste_unselectable'>
 			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
 				<span class='paste_toolbar_button'>Save Paste</span>
+			</div>
+			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.copy_url()'>
+				<span class='paste_toolbar_button'>Copy URL</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
 				<span class='paste_toolbar_button'>New Paste</span>
