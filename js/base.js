@@ -665,7 +665,7 @@ Paste.prepare_modes = function()
 	[
 		{
 			name: "HTML Render",
-			mode: "paste_html_render"
+			mode: "htmlmixed"
 		}
 	]
 
@@ -761,14 +761,12 @@ Paste.start_normal_mode = function()
 
 Paste.do_change_mode = function(name, mode)
 {
-	if(mode === "paste_html_render")
+	if(name === "HTML Render")
 	{
 		if(!Paste.render_mode)
 		{
 			Paste.start_render_mode()
 		}
-
-		mode = "htmlmixed"
 	}
 
 	else
