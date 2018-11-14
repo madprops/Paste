@@ -47,6 +47,7 @@ Paste.init = function()
 	Paste.main = document.getElementById("paste_main")
 	Paste.content_main = document.getElementById("paste_content_main")
 	Paste.render_container = document.getElementById("paste_render_container")
+	Paste.render_iframe = document.querySelector("#paste_render_iframe")
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
@@ -731,18 +732,11 @@ Paste.render_timer = (function(value)
 
 Paste.do_render = function()
 {
-	let oiframe = document.querySelector("#paste_render_iframe")
-	oiframe.id = "paste_render_iframe_old"
-	
-	let iframe = document.createElement("iframe")
-	iframe.id = "paste_render_iframe"
-	
-	let value = Paste.get_value()
-	let src = 'data:text/html;charset=utf-8,' + encodeURI(value)
-	
-	iframe.src = src
-	
-	oiframe.replaceWith(iframe)
+	let doc = Paste.render_iframe.contentWindow.document
+
+	doc.open()
+	doc.write(Paste.get_value())
+	doc.close()
 }
 
 Paste.start_render_mode = function()
