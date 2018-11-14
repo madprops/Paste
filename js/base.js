@@ -26,6 +26,13 @@ Paste.default_render_source = `
 				text-align: center;
 			}
 		</style>
+
+		<script>
+			window.onload = function()
+			{
+				// Script when everything is loaded -->
+			}
+		</script>
 	</head>
 
 	<body>
