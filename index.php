@@ -104,11 +104,11 @@
 			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
 				<span class='paste_toolbar_button'>Save Paste</span>
 			</div>
-			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.copy_url()'>
-				<span class='paste_toolbar_button'>Copy URL</span>
-			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
 				<span class='paste_toolbar_button'>New Paste</span>
+			</div>
+			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.copy_url()'>
+				<span class='paste_toolbar_button'>Copy URL</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_paste_history()'>
 				<span class='paste_toolbar_button'>Paste History</span>
