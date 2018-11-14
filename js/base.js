@@ -101,7 +101,7 @@ Paste.create_editor = function()
 	})
 
 	Paste.document = Paste.editor.getDoc()
-	Paste.document.setValue(Paste.initial_value)
+	Paste.set_value(Paste.initial_value)
 
 	Paste.editor.on("change", function()
 	{
@@ -114,14 +114,14 @@ Paste.create_editor = function()
 
 Paste.clear_textarea = function()
 {
-	Paste.document.setValue("")
+	Paste.set_value("")
 }
 
 Paste.save_paste = function()
 {
 	Paste.editor.focus()
 
-	let content = Paste.document.getValue()
+	let content = Paste.get_value()
 
 	if(!content.trim())
 	{
@@ -367,7 +367,7 @@ Paste.check_paste_history = function()
 
 Paste.get_sample = function()
 {
-	let content = Paste.document.getValue()
+	let content = Paste.get_value()
 	let sample = content.replace(/\s+/g, " ").trim().substring(0, 200)
 	return sample
 }
@@ -615,7 +615,7 @@ Paste.new_paste = function()
 
 	else
 	{
-		Paste.document.setValue("")
+		Paste.set_value("")
 		Paste.change_mode(Paste.default_mode)
 		Paste.editor.focus()
 	}
@@ -737,7 +737,7 @@ Paste.do_render = function()
 	let iframe = document.createElement("iframe")
 	iframe.id = "paste_render_iframe"
 	
-	let value = Paste.editor.getValue()
+	let value = Paste.get_value()
 	let src = 'data:text/html;charset=utf-8,' + encodeURI(value)
 	
 	iframe.src = src
@@ -748,11 +748,12 @@ Paste.do_render = function()
 Paste.start_render_mode = function()
 {
 	Paste.render_container.style.display = "block"
+	
 	Paste.render_mode = true
 
-	if(!Paste.editor.getValue().trim().length)
+	if(!Paste.get_value().trim().length)
 	{
-		Paste.editor.setValue(Paste.default_render_source)
+		Paste.set_value(Paste.default_render_source)
 	}
 
 	else
@@ -764,7 +765,13 @@ Paste.start_render_mode = function()
 Paste.start_normal_mode = function()
 {
 	Paste.render_container.style.display = "none"
+
 	Paste.render_mode = false
+
+	if(Paste.get_value() === Paste.default_render_source)
+	{
+		Paste.set_value("")
+	}
 }
 
 Paste.do_change_mode = function(name, mode)
@@ -1106,10 +1113,20 @@ Paste.modal_item_down = function()
 
 Paste.paste_is_modified = function()
 {
-	if(Paste.document.getValue() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
+	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
 	{
 		return false
 	}
 
 	return true
+}
+
+Paste.get_value = function()
+{
+	return Paste.document.getValue()
+}
+
+Paste.set_value = function(s)
+{
+	Paste.document.setValue(s)
 }
