@@ -75,7 +75,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=18'>
+	<link rel='stylesheet' href='/css/style.css?version=19'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=46'></script>
+	<script src='/js/base.js?version=47'></script>
 	<script>
 		window.onload = function()
 		{
@@ -106,9 +106,6 @@
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
 				<span class='paste_toolbar_button'>New Paste</span>
-			</div>
-			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
-				<span class='paste_toolbar_button'>Copy URL</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_paste_history()'>
 				<span class='paste_toolbar_button'>Paste History</span>

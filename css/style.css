@@ -35,8 +35,7 @@ body, html
 .paste_toolbar_button_container
 {
 	color: white;
-	flex-grow: 1;
-	flex-shrink: 1;
+	flex: 1 1 0;
 	text-align: center;
 	position: relative;
 	height: 100%;
