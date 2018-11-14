@@ -75,7 +75,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=17'>
+	<link rel='stylesheet' href='/css/style.css?version=18'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +85,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=44'></script>
+	<script src='/js/base.js?version=45'></script>
 	<script>
 		window.onload = function()
 		{
@@ -117,11 +117,17 @@
 				<span class='paste_toolbar_button' id='paste_mode_text'>---</span>
 			</div>
 		</div>
+
 		<div id='paste_content_main'>
 			<textarea id='paste_textarea'></textarea>
+			<div id='paste_render_container'>
+				<iframe id='paste_render_iframe'></iframe>
+			</div>
 		</div>
 	</div>
+
 	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>
+	
 	<div id='paste_modal'>
 		<div id='paste_modal_titlebar' class='paste_unselectable'>
 			<div id='paste_modal_titlebar_inner'></div>
@@ -131,7 +137,9 @@
 		</div>
 		<div id='paste_modal_inner'></div>
 	</div>
+
 	<div id='paste_footer' class='paste_unselectable'></div>
+
 	<audio id='paste_audio_nope' src='/audio/nope.mp3?version=1'>
 	<audio id='paste_audio_succ' src='/audio/succ.mp3?version=1'>
 	<audio id='paste_audio_succ2' src='/audio/succ2.mp3?version=1'>

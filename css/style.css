@@ -84,13 +84,34 @@ body, html
 	bottom: 0;
 	width: 100%;
 	background-color: #262833;
+	display: flex;
+	flex-direction: row;
 }
 
-.CodeMirror
+#paste_render_container
+{
+	flex: 1 1 50%;
+	display: none;
+	height: 100%;
+	background-color: white;
+	color: black;
+	overflow: hidden;
+}
+
+#paste_render_iframe
 {
 	position: relative;
 	height: 100%;
 	width: 100%;
+	outline: none;
+	border: none;
+}
+
+.CodeMirror
+{
+	flex: 1 1 50%;
+	position: relative;
+	height: 100%;
 	font: 400 1.2rem sans-serif;
 	opacity: 0.95;
 }

@@ -8,11 +8,38 @@ Paste.filter_delay = 250
 Paste.default_mode = "Plain Text"
 Paste.modal_type = ""
 Paste.max_content_size = 500000
+Paste.render_mode = false
+Paste.render_delay = 1000
+
+Paste.default_render_source = `
+<!DOCTYPE html>
+
+<html>
+
+	<head>
+		<style>
+			body, html
+			{
+				color: #916aad;
+				background-color: white;
+				font-family: sans-serif;
+				text-align: center;
+			}
+		</style>
+	</head>
+
+	<body>
+		<h1>Hello World</h1>
+	</body>
+
+</html>
+`
 
 Paste.init = function()
 {
 	Paste.main = document.getElementById("paste_main")
 	Paste.content_main = document.getElementById("paste_content_main")
+	Paste.render_container = document.getElementById("paste_render_container")
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.modal = document.getElementById("paste_modal")
@@ -68,6 +95,14 @@ Paste.create_editor = function()
 
 	Paste.document = Paste.editor.getDoc()
 	Paste.document.setValue(Paste.initial_value)
+
+	Paste.editor.on("change", function()
+	{
+		if(Paste.render_mode)
+		{
+			Paste.render_timer()
+		}
+	})
 }
 
 Paste.clear_textarea = function()
@@ -626,7 +661,15 @@ Paste.prepare_modes = function()
 {
 	Paste.modes_array = []
 
-	for(let mode of CodeMirror.modeInfo)
+	Paste.custom_modes = 
+	[
+		{
+			name: "HTML Render",
+			mode: "paste_html_render"
+		}
+	]
+
+	for(let mode of CodeMirror.modeInfo.concat(Paste.custom_modes))
 	{
 		let obj = {}
 
@@ -660,8 +703,82 @@ Paste.order_modes = function()
 	Paste.modes_string = Paste.modes_array.map(m => m.string).join("")
 }
 
+Paste.render_timer = (function(value)
+{
+	let timer
+
+	return function(value)
+	{
+		clearTimeout(timer)
+
+		timer = setTimeout(function()
+		{
+			if(Paste.render_mode)
+			{
+				Paste.do_render()
+			}
+		}, Paste.render_delay)
+	}
+})()
+
+Paste.do_render = function()
+{
+	let oiframe = document.querySelector("#paste_render_iframe")
+	oiframe.id = "paste_render_iframe_old"
+	
+	let iframe = document.createElement("iframe")
+	iframe.id = "paste_render_iframe"
+	
+	let value = Paste.editor.getValue()
+	let src = 'data:text/html;charset=utf-8,' + encodeURI(value)
+	
+	iframe.src = src
+	
+	oiframe.replaceWith(iframe)
+}
+
+Paste.start_render_mode = function()
+{
+	Paste.render_container.style.display = "block"
+	Paste.render_mode = true
+
+	if(!Paste.editor.getValue().trim().length)
+	{
+		Paste.editor.setValue(Paste.default_render_source)
+	}
+
+	else
+	{
+		Paste.do_render()
+	}
+}
+
+Paste.start_normal_mode = function()
+{
+	Paste.render_container.style.display = "none"
+	Paste.render_mode = false
+}
+
 Paste.do_change_mode = function(name, mode)
 {
+	if(mode === "paste_html_render")
+	{
+		if(!Paste.render_mode)
+		{
+			Paste.start_render_mode()
+		}
+
+		mode = "htmlmixed"
+	}
+
+	else
+	{
+		if(Paste.render_mode)
+		{
+			Paste.start_normal_mode()
+		}
+	}
+
 	Paste.editor.setOption("mode", mode)
 	Paste.mode_text.innerHTML = name
 	Paste.mode_name = name
@@ -756,6 +873,7 @@ Paste.get_mode_history = function()
 		let array = 
 		[
 			{mode_name: "Plain Text"},
+			{mode_name: "HTML Render"},
 			{mode_name: "JavaScript"}, 
 			{mode_name: "HTML"},
 			{mode_name: "CSS"},
