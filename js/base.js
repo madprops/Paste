@@ -1008,13 +1008,13 @@ Paste.trigger_filter = function()
 
 Paste.activate_key_detection = function()
 {
-	if(Paste.is_loading)
-	{
-		return false
-	}
-	
 	document.addEventListener("keydown", function(e)
 	{
+		if(Paste.is_loading)
+		{
+			return false
+		}
+
 		if(Paste.modal_type)
 		{
 			if(document.activeElement !== Paste.modal_filter)
@@ -1026,6 +1026,11 @@ Paste.activate_key_detection = function()
 
 	document.addEventListener("keyup", function(e)
 	{
+		if(Paste.is_loading)
+		{
+			return false
+		}
+		
 		if(Paste.modal_type)
 		{
 			if(e.key === "Escape")
