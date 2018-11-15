@@ -37,10 +37,11 @@ function random_word($length = 4)
 }
 
 $max_content_size = 500000;
+$max_comment_size = 200;
 
 // Create a new database, if the file doesn't exist and open it for reading/writing.
 // The extension of the file is arbitrary.
-$db = new SQLite3('pastes_v3.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+$db = new SQLite3('pastes_v4.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 // Create a table.
 $db->query('CREATE TABLE IF NOT EXISTS "pastes" (
@@ -49,6 +50,7 @@ $db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 	"mode_name" VARCHAR,
 	"code" VARCHAR,
 	"revision" INTEGER,
+	"comment" VARCHAR,
 	"date" DATETIME
 )');
 
@@ -69,6 +71,23 @@ else
 $content_length = strlen($content);
 
 if($content_length === 0 || $content_length > $max_content_size)
+{
+	exit();
+}
+
+if(isset($_POST["comment"]))
+{
+	$comment = $_POST["comment"];
+}
+
+else
+{
+	$comment = "";
+}
+
+$comment_length = strlen($comment);
+
+if($comment_length > $max_comment_size)
 {
 	exit();
 }
@@ -126,12 +145,13 @@ else
 	$mode_name = "Plain Text";
 }
 
-$statement = $db->prepare('INSERT INTO "pastes" ("content", "mode_name", "code", "revision", "date")
-	VALUES (:acontent, :amode_name, :acode, :arevision, :adate)');
+$statement = $db->prepare('INSERT INTO "pastes" ("content", "mode_name", "code", "revision", "comment", "date")
+	VALUES (:acontent, :amode_name, :acode, :arevision, :acomment, :adate)');
 $statement->bindValue(':acontent', $content);
 $statement->bindValue(':amode_name', $mode_name);
 $statement->bindValue(':acode', $code);
 $statement->bindValue(':arevision', $revision);
+$statement->bindValue(':acomment', $comment);
 $statement->bindValue(':adate', $date);
 $statement->execute(); // you can reuse the statement with different values
 

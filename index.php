@@ -1,8 +1,5 @@
 <?php
 
-	error_reporting(E_ALL);
-	ini_set('display_errors', 'on');
-
 	function is_null_or_empty_string($str)
 	{
 		return (!isset($str) || trim($str) === '');
@@ -22,6 +19,7 @@
 		$title = "Paste";
 		$revision = 1;
 		$mode_name = "";
+		$comment = "";
 	}
 
 	else
@@ -32,7 +30,7 @@
 
 		// Create a new database, if the file doesn't exist and open it for reading/writing.
 		// The extension of the file is arbitrary.
-		$db = new SQLite3('pastes_v3.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+		$db = new SQLite3('pastes_v4.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 		// Create a table.
 		$db->query('CREATE TABLE IF NOT EXISTS "pastes" (
@@ -41,6 +39,7 @@
 			"mode_name" VARCHAR,
 			"code" VARCHAR,
 			"revision" INTEGER,
+			"comment" VARCHAR,
 			"date" DATETIME
 		)');
 
@@ -51,11 +50,17 @@
 		$array = $result->fetchArray(SQLITE3_ASSOC);
 		$content = $array["content"];
 		$mode_name = $array["mode_name"];
+		$comment = $array["comment"];
 
 		if(is_null_or_empty_string($content))
 		{
 			header("Location: /");
 			exit();
+		}
+
+		if(is_null_or_empty_string($comment))
+		{
+			$comment = "";
 		}
 
 		$title = "Paste - " . $url;
@@ -75,7 +80,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=20'>
+	<link rel='stylesheet' href='/css/style.css?version=21'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -85,7 +90,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=52'></script>
+	<script src='/js/base.js?version=55'></script>
 	<script>
 		window.onload = function()
 		{
@@ -94,12 +99,18 @@
 			Paste.saved = <?php echo json_encode($saved); ?>;
 			Paste.original_mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.mode_name = <?php echo json_encode($mode_name); ?>;
+			Paste.comment = <?php echo json_encode($comment); ?>;
 			Paste.init()
 		}
 	</script>
 </head>
 <body>
 	<div id='paste_main'>
+		<div id='paste_comment_container'>
+			<div id='paste_comment_placeholder'>Leave A Comment</div>
+			<div id='paste_comment_content' contenteditable="true"></div>
+		</div>
+
 		<div id='paste_toolbar' class='paste_unselectable'>
 			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
 				<span class='paste_toolbar_button'>Save Paste</span>

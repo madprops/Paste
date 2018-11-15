@@ -1,6 +1,6 @@
 const Paste = {}
 
-Paste.ls_paste_history = "paste_history_v1"
+Paste.ls_paste_history = "paste_history_v2"
 Paste.ls_mode_history = "mode_history_v1"
 Paste.max_paste_history_items = 200
 Paste.max_mode_history_items = 20
@@ -10,6 +10,7 @@ Paste.modal_type = ""
 Paste.max_content_size = 500000
 Paste.render_mode = false
 Paste.render_delay = 1000
+Paste.max_comment_length = 200
 
 Paste.default_render_source = `
 <!DOCTYPE html>
@@ -42,6 +43,8 @@ Paste.default_render_source = `
 </html>
 `.trim()
 
+Paste.default_comment = "Leave a comment here"
+
 Paste.init = function()
 {
 	Paste.main = document.getElementById("paste_main")
@@ -59,6 +62,7 @@ Paste.init = function()
 	Paste.audio_nope = document.getElementById("paste_audio_nope")
 	Paste.audio_succ = document.getElementById("paste_audio_succ")
 	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
+	Paste.comment_content = document.getElementById("paste_comment_content")
 	
 	Paste.create_editor()
 
@@ -78,6 +82,7 @@ Paste.init = function()
 	Paste.setup_modal()
 	Paste.activate_key_detection()
 	Paste.remove_content_background()
+	Paste.setup_comment()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -159,7 +164,7 @@ Paste.save_paste = function()
 		Paste.posting = false
 	}, 10000)
 
-	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name})
+	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name, comment:Paste.get_comment()})
 }
 
 Paste.send_post = function(target, data)
@@ -315,7 +320,7 @@ Paste.push_to_paste_history = function(save=true)
 {
 	let index = Paste.get_paste_history_item_index(Paste.url)
 
-	let obj = {url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name}
+	let obj = {url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name, comment:Paste.comment}
 
 	if(index === -1)
 	{
@@ -420,16 +425,22 @@ Paste.make_paste_history_string = function()
 		let item = Paste.paste_history.items[i]
 
 		s += `<a class='paste_modal_item paste_history_item paste_unselectable' href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
+
+		if(item.comment)
+		{
+			s += `<div class='paste_history_item_comment'>${item.comment.substring(0, 50)}</div>`
+		}
+
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
 
 		if(item.mode_name)
 		{
 			s += `<div class='paste_history_item_mode_name'>(${item.mode_name})</div>`
 		}
+
 		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
 		s += `</a>`
-	
 	}
 	
 	s += "<div class='spacer1'></div>"
@@ -449,7 +460,13 @@ Paste.show_paste_history = function()
 
 Paste.highlight_modal_item = function(el, scroll=false)
 {	
+	if(!el)
+	{
+		return false
+	}
+	
 	Paste.remove_modal_item_highlight()
+	
 	el.classList.add("paste_modal_item_highlighted")
 
 	if(scroll)
@@ -1014,6 +1031,14 @@ Paste.activate_key_detection = function()
 			}
 		}
 
+		else if(document.activeElement === Paste.comment_content)
+		{
+			if(e.key === "Enter")
+			{
+				Paste.save_paste()
+			}
+		}
+
 		else
 		{
 			if(e.key === "Escape")
@@ -1107,7 +1132,7 @@ Paste.modal_item_down = function()
 
 Paste.paste_is_modified = function()
 {
-	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name)
+	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name && Paste.get_comment() === Paste.comment)
 	{
 		return false
 	}
@@ -1123,4 +1148,40 @@ Paste.get_value = function()
 Paste.set_value = function(s)
 {
 	Paste.document.setValue(s)
+}
+
+Paste.setup_comment = function()
+{
+	Paste.comment_content.innerText = Paste.comment
+
+	Paste.comment_content.addEventListener("input", function()
+	{
+		let val = Paste.get_comment()
+
+		if(val.length === 0)
+		{
+			Paste.set_comment(val)
+		}
+
+		if(val.length > Paste.max_comment_length)
+		{
+			val = val.substring(0, Paste.max_comment_length).trim()
+			Paste.set_comment(val)
+		}
+	})
+}
+
+Paste.clean_string2 = function(s)
+{
+	return s.replace(/\s+/g, ' ').trim()
+}
+
+Paste.get_comment = function()
+{
+	return Paste.clean_string2(Paste.comment_content.innerText)
+}
+
+Paste.set_comment = function(val)
+{
+	Paste.comment_content.innerText = val
 }
