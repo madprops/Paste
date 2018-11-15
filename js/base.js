@@ -1200,12 +1200,10 @@ Paste.setup_window_load = function()
 
 Paste.stop_loading_mode = function()
 {
-	Paste.main.style.opacity = 1
 	Paste.loading.style.display = "none"
 }
 
 Paste.start_loading_mode = function()
 {
-	Paste.main.style.opacity = 0
-	Paste.loading.style.display = "block"
+	Paste.loading.style.display = "flex"
 }
