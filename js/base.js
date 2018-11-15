@@ -427,7 +427,8 @@ Paste.make_paste_history_string = function()
 	{
 		let item = Paste.paste_history.items[i]
 
-		s += `<a class='paste_modal_item paste_history_item paste_unselectable' href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
+		s += `<a class='paste_modal_item paste_history_item paste_unselectable' 
+		href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)' onclick='Paste.hide_modal()'>`
 
 		if(item.comment)
 		{
