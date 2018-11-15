@@ -61,9 +61,14 @@
 		if(is_null_or_empty_string($comment))
 		{
 			$comment = "";
+			$title = "Paste - " . $url;
 		}
 
-		$title = "Paste - " . $url;
+		else
+		{
+			$title = "Paste - " . substr($comment, 0, 140);
+		}
+
 
 		$db->close();
 	}
@@ -90,7 +95,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=55'></script>
+	<script src='/js/base.js?version=56'></script>
 	<script>
 		window.onload = function()
 		{

@@ -634,6 +634,7 @@ Paste.new_paste = function()
 	else
 	{
 		Paste.set_value("")
+		Paste.set_comment("")
 		Paste.change_mode(Paste.default_mode)
 		Paste.editor.focus()
 	}
