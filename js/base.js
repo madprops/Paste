@@ -428,7 +428,7 @@ Paste.make_paste_history_string = function()
 
 		if(item.comment)
 		{
-			s += `<div class='paste_history_item_comment'>${item.comment.substring(0, 50)}</div>`
+			s += `<div class='paste_history_item_comment'>${Paste.make_safe(item.comment.substring(0, 50))}</div>`
 		}
 
 		s += `<div class='paste_history_item_url'>${item.url}</div>`
@@ -437,7 +437,6 @@ Paste.make_paste_history_string = function()
 		{
 			s += `<div class='paste_history_item_mode_name'>(${item.mode_name})</div>`
 		}
-
 		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
 		s += `</a>`
@@ -549,9 +548,31 @@ Paste.do_paste_history_filter = function(value)
 
 	for(let item of items)
 	{
-		if(item.innerHTML.toLowerCase().includes(lc_value))
+		if(item.innerText.toLowerCase().includes(lc_value))
 		{
 			item.style.display = "initial"
+		}
+
+		else
+		{
+			item.style.display = "none"
+		}
+	}
+
+	Paste.after_filter()
+}
+
+Paste.do_mode_selector_filter = function(value)
+{
+	let lc_value = value.toLowerCase()
+
+	let items = Array.from(document.querySelectorAll(".paste_mode_selector_item"))
+
+	for(let item of items)
+	{
+		if(item.innerText.toLowerCase().includes(lc_value))
+		{
+			item.style.display = "flex"
 		}
 
 		else
@@ -660,28 +681,6 @@ Paste.show_mode_selector = function()
 	s += "<div class='spacer1'></div>"
 
 	Paste.show_modal(s, "Language Mode")
-}
-
-Paste.do_mode_selector_filter = function(value)
-{
-	let lc_value = value.toLowerCase()
-
-	let items = Array.from(document.querySelectorAll(".paste_mode_selector_item"))
-
-	for(let item of items)
-	{
-		if(item.innerHTML.toLowerCase().includes(lc_value))
-		{
-			item.style.display = "flex"
-		}
-
-		else
-		{
-			item.style.display = "none"
-		}
-	}
-
-	Paste.after_filter()
 }
 
 Paste.prepare_modes = function()
