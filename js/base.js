@@ -428,7 +428,7 @@ Paste.make_paste_history_string = function()
 		let item = Paste.paste_history.items[i]
 
 		s += `<a class='paste_modal_item paste_history_item paste_unselectable' 
-		href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)' onclick='Paste.hide_modal()'>`
+		href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
 
 		if(item.comment)
 		{
@@ -1205,5 +1205,10 @@ Paste.stop_loading_mode = function()
 
 Paste.start_loading_mode = function()
 {
+	if(Paste.modal_type)
+	{
+		Paste.hide_modal()
+	}
+	
 	Paste.loading.style.display = "flex"
 }
