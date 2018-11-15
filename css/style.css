@@ -246,16 +246,18 @@ body, html
 {
 	flex-grow: 0;
 	flex-shrink: 0;
-	background-color: #7b729f;
 	color: white;
 	height: 2rem;
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	padding-top: 0.8rem;
+	padding-bottom: 0.2rem;
 }
 
 #paste_modal_titlebar_inner
 {
+	font-size: 1.7rem;
 	cursor: pointer;
 }
 
