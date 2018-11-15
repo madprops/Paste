@@ -166,8 +166,8 @@ body, html
 
 .CodeMirror-lines
 {
-	padding-top: 14px !important;
-	padding-bottom: 14px !important;
+	padding-top: 12px !important;
+	padding-bottom: 12px !important;
 }
 
 .CodeMirror-simplescroll-vertical,
@@ -404,6 +404,6 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 
 #paste_loading div
 {
-	color: white;
+	color: #dfdfdf;
 	font-size: 2rem;
 }
