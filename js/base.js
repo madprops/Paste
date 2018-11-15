@@ -1084,6 +1084,25 @@ Paste.activate_key_detection = function()
 			}
 		}
 	})
+
+	document.addEventListener("input", function()
+	{
+		if(document.activeElement === Paste.comment_content)
+		{
+			let val = Paste.get_comment()
+
+			if(val.length === 0)
+			{
+				Paste.set_comment(val)
+			}
+
+			if(val.length > Paste.max_comment_length)
+			{
+				val = val.substring(0, Paste.max_comment_length).trim()
+				Paste.set_comment(val)
+			}
+		}
+	})
 }
 
 Paste.get_visible_modal_items = function()
@@ -1190,22 +1209,6 @@ Paste.set_value = function(s)
 Paste.setup_comment = function()
 {
 	Paste.comment_content.innerText = Paste.comment
-
-	Paste.comment_content.addEventListener("input", function()
-	{
-		let val = Paste.get_comment()
-
-		if(val.length === 0)
-		{
-			Paste.set_comment(val)
-		}
-
-		if(val.length > Paste.max_comment_length)
-		{
-			val = val.substring(0, Paste.max_comment_length).trim()
-			Paste.set_comment(val)
-		}
-	})
 }
 
 Paste.clean_string2 = function(s)
