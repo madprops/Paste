@@ -11,6 +11,7 @@ Paste.max_content_size = 500000
 Paste.render_mode = false
 Paste.render_delay = 1000
 Paste.max_comment_length = 200
+Paste.is_loading = true
 
 Paste.default_render_source = `
 <!DOCTYPE html>
@@ -985,6 +986,11 @@ Paste.trigger_filter = function()
 
 Paste.activate_key_detection = function()
 {
+	if(Paste.is_loading)
+	{
+		return false
+	}
+	
 	document.addEventListener("keydown", function(e)
 	{
 		if(Paste.modal_type)
@@ -1201,6 +1207,7 @@ Paste.setup_window_load = function()
 Paste.stop_loading_mode = function()
 {
 	Paste.loading.style.display = "none"
+	Paste.is_loading = false
 }
 
 Paste.start_loading_mode = function()
@@ -1211,4 +1218,5 @@ Paste.start_loading_mode = function()
 	}
 	
 	Paste.loading.style.display = "flex"
+	Paste.is_loading = true
 }
