@@ -164,6 +164,18 @@ body, html
 	opacity: 0.95;
 }
 
+.CodeMirror-lines
+{
+	padding-top: 14px !important;
+	padding-bottom: 14px !important;
+}
+
+.CodeMirror-simplescroll-vertical,
+.CodeMirror-simplescroll-horizontal
+{
+	width: 10px !important;
+}
+
 .paste_unselectable
 {
 	-webkit-touch-callout: none;
