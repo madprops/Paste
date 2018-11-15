@@ -40,7 +40,7 @@ Paste.default_render_source = `
 	</body>
 
 </html>
-`
+`.trim()
 
 Paste.init = function()
 {
