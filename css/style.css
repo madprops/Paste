@@ -19,6 +19,7 @@ body, html
 	background-repeat: no-repeat;
 	background-position: center center;
 	overflow: hidden;
+	opacity: 0;
 }
 
 #paste_comment_container
@@ -386,4 +387,14 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 #paste_textarea
 {
 	display: none;
+}
+
+#paste_loading
+{
+	position: fixed;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	color: white;
+	font-size: 2rem;
 }

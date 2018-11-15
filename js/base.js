@@ -63,6 +63,7 @@ Paste.init = function()
 	Paste.audio_succ = document.getElementById("paste_audio_succ")
 	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
 	Paste.comment_content = document.getElementById("paste_comment_content")
+	Paste.loading = document.getElementById("paste_loading")
 	
 	Paste.create_editor()
 
@@ -83,6 +84,8 @@ Paste.init = function()
 	Paste.activate_key_detection()
 	Paste.remove_content_background()
 	Paste.setup_comment()
+	Paste.setup_window_load()
+	Paste.stop_loading_mode()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -1184,4 +1187,24 @@ Paste.get_comment = function()
 Paste.set_comment = function(val)
 {
 	Paste.comment_content.innerText = val
+}
+
+Paste.setup_window_load = function()
+{
+	window.onbeforeunload = function()
+	{
+		Paste.start_loading_mode()
+	}
+}
+
+Paste.stop_loading_mode = function()
+{
+	Paste.main.style.opacity = 1
+	Paste.loading.style.display = "none"
+}
+
+Paste.start_loading_mode = function()
+{
+	Paste.main.style.opacity = 0
+	Paste.loading.style.display = "block"
 }
