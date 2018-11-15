@@ -87,6 +87,7 @@ Paste.init = function()
 	Paste.setup_comment()
 	Paste.setup_window_load()
 	Paste.stop_loading_mode()
+	Paste.setup_render()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -746,11 +747,32 @@ Paste.render_timer = (function(value)
 		{
 			if(Paste.render_mode)
 			{
-				Paste.do_render()
+				Paste.render()
 			}
 		}, Paste.render_delay)
 	}
 })()
+
+Paste.setup_render = function()
+{
+	Paste.render_iframe.addEventListener("load", function()
+	{
+		if(Paste.render_mode)
+		{
+			Paste.do_render()
+		}
+	})
+}
+
+Paste.reset_render_iframe = function()
+{
+	Paste.render_iframe.src = `about:blank?t=${Date.now()}_${Paste.get_random_string(4)}`
+}
+
+Paste.render = function()
+{
+	Paste.reset_render_iframe()
+}
 
 Paste.do_render = function()
 {
@@ -774,7 +796,7 @@ Paste.start_render_mode = function()
 
 	else
 	{
-		Paste.do_render()
+		Paste.render()
 	}
 }
 
@@ -1219,4 +1241,23 @@ Paste.start_loading_mode = function()
 	
 	Paste.loading.style.display = "flex"
 	Paste.is_loading = true
+}
+
+Paste.get_random_int = function(min, max)
+{
+	return Math.floor(Math.random() * (max  -min + 1) + min)
+}	
+
+Paste.get_random_string = function(n)
+{
+	let text = ""
+
+	let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+	for(let i=0; i < n; i++)
+	{
+		text += possible[Paste.get_random_int(0, possible.length - 1)]
+	}
+
+	return text
 }
