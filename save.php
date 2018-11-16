@@ -91,7 +91,7 @@ else
 
 $content_length = strlen($content);
 
-if($content_length === 0 || $content_length > $max_content_length)
+if($content_length > $max_content_length)
 {
 	exit();
 }
@@ -109,6 +109,11 @@ else
 $comment_length = strlen($comment);
 
 if($comment_length > $max_comment_length)
+{
+	exit();
+}
+
+if($content_length === 0 && $comment_length === 0)
 {
 	exit();
 }

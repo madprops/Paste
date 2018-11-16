@@ -53,12 +53,6 @@
 		$mode_name = $array["mode_name"];
 		$comment = $array["comment"];
 
-		if(is_null_or_empty_string($content))
-		{
-			header("Location: /");
-			exit();
-		}
-
 		if(is_null_or_empty_string($comment))
 		{
 			$comment = "";
@@ -96,12 +90,12 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=74'></script>
+	<script src='/js/base.js?version=75'></script>
 	<script>
 		window.onload = function()
 		{
 			Paste.url = <?php echo json_encode($url); ?>;
-			Paste.initial_value = <?php echo json_encode($content); ?>;
+			Paste.initial_content = <?php echo json_encode($content); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;
 			Paste.initial_mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.mode_name = <?php echo json_encode($mode_name); ?>;
