@@ -481,7 +481,7 @@ Paste.make_paste_history_string = function()
 
 		let info = ""
 
-		if(Paste.get_token_by_url(Paste.url))
+		if(Paste.get_token_by_url(item.url))
 		{
 			info = " (Owner)"
 		}
