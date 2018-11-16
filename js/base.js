@@ -590,52 +590,37 @@ Paste.modal_filter_timer = (function(value)
 
 		timer = setTimeout(function()
 		{
-			if(Paste.modal_type === "Paste History")
-			{
-				Paste.do_paste_history_filter(value)
-			}
-
-			else if(Paste.modal_type === "Language Mode")
-			{
-				Paste.do_mode_selector_filter(value)
-			}
+			Paste.do_modal_filter(value)
 		}, Paste.filter_delay)
 	}
 })()
 
-Paste.do_paste_history_filter = function(value)
+Paste.do_modal_filter = function(value)
 {
-	let lc_value = value.toLowerCase()
+	let lc_value = Paste.clean_string2(value).toLowerCase()
 
 	let items = Array.from(document.querySelectorAll(".paste_history_item"))
 
+	let words = lc_value.split(" ")
+
 	for(let item of items)
 	{
-		if(item.innerText.toLowerCase().includes(lc_value))
+		let item_value = item.innerText.toLowerCase()
+
+		let found = true
+
+		for(let word of words)
+		{
+			if(!item_value.includes(word))
+			{
+				found = false
+				break
+			}
+		}
+
+		if(found)
 		{
 			item.style.display = "initial"
-		}
-
-		else
-		{
-			item.style.display = "none"
-		}
-	}
-
-	Paste.after_filter()
-}
-
-Paste.do_mode_selector_filter = function(value)
-{
-	let lc_value = value.toLowerCase()
-
-	let items = Array.from(document.querySelectorAll(".paste_mode_selector_item"))
-
-	for(let item of items)
-	{
-		if(item.innerText.toLowerCase().includes(lc_value))
-		{
-			item.style.display = "flex"
 		}
 
 		else
@@ -1060,7 +1045,7 @@ Paste.play_audio = function(type)
 
 Paste.trigger_filter = function()
 {
-	Paste.modal_filter_timer(Paste.modal_filter.value.trim())
+	Paste.modal_filter_timer(Paste.modal_filter.value)
 }
 
 Paste.activate_key_detection = function()

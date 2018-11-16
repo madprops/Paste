@@ -387,9 +387,6 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 	background-color: #7b729f;
 	color: white;
 	text-align: center;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	padding-top: 0.8rem;
 	padding-bottom: 0.8rem;
 	margin-bottom: 1rem;
