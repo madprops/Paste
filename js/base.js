@@ -66,7 +66,6 @@ Paste.init = function()
 	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
 	Paste.comment_content = document.getElementById("paste_comment_content")
 	Paste.loading = document.getElementById("paste_loading")
-	Paste.loading_content = document.getElementById("paste_loading_content")
 	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
 	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
 
@@ -1288,16 +1287,6 @@ Paste.start_loading_mode = function(leaving=false)
 	if(Paste.modal_type)
 	{
 		Paste.hide_modal()
-	}
-
-	if(leaving)
-	{
-		Paste.loading_content.innerHTML = "Leaving"
-	}
-
-	else
-	{
-		Paste.loading_content.innerHTML = "Loading"
 	}
 	
 	Paste.loading.style.display = "flex"
