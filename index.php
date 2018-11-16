@@ -40,7 +40,8 @@
 			"code" VARCHAR,
 			"revision" INTEGER,
 			"comment" VARCHAR,
-			"date" DATETIME
+			"date" DATETIME,
+			"token" VARCHAR
 		)');
 
 		$statement = $db->prepare('SELECT * FROM "pastes" WHERE "code" = ? AND "revision" = ?');
@@ -85,7 +86,7 @@
 	<link rel='stylesheet' href='/codemirror/theme/dracula.css'>
 	<link rel='stylesheet' href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel='stylesheet' href='/css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='/css/style.css?version=28'>
+	<link rel='stylesheet' href='/css/style.css?version=29'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -95,14 +96,14 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=66'></script>
+	<script src='/js/base.js?version=67'></script>
 	<script>
 		window.onload = function()
 		{
 			Paste.url = <?php echo json_encode($url); ?>;
 			Paste.initial_value = <?php echo json_encode($content); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;
-			Paste.original_mode_name = <?php echo json_encode($mode_name); ?>;
+			Paste.initial_mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.comment = <?php echo json_encode($comment); ?>;
 			Paste.init()
@@ -118,16 +119,19 @@
 
 		<div id='paste_toolbar' class='paste_unselectable'>
 			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
-				<span class='paste_toolbar_button'>Save Paste</span>
+				<span class='paste_toolbar_button'>Save</span>
+			</div>			
+			<div id='paste_toolbar_update' class='paste_toolbar_button_container paste_border_left' onclick='Paste.update_paste()'>
+				<span class='paste_toolbar_button'>Update</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
-				<span class='paste_toolbar_button'>New Paste</span>
+				<span class='paste_toolbar_button'>New</span>
 			</div>
-			<div id='paste_toolbar_save' class='paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
-				<span class='paste_toolbar_button'>Copy URL</span>
+			<div id='paste_toolbar_copy' class='paste_toolbar_button_container paste_border_left' onclick='Paste.copy_url()'>
+				<span class='paste_toolbar_button'>Copy</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_paste_history()'>
-				<span class='paste_toolbar_button'>Paste History</span>
+				<span class='paste_toolbar_button'>History</span>
 			</div>
 			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.show_mode_selector()'>
 				<span class='paste_toolbar_button' id='paste_mode_text'>---</span>

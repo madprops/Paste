@@ -2,15 +2,16 @@ const Paste = {}
 
 Paste.ls_paste_history = "paste_history_v2"
 Paste.ls_mode_history = "mode_history_v1"
+Paste.ls_tokens = "tokens_v1"
 Paste.max_paste_history_items = 200
 Paste.max_mode_history_items = 20
 Paste.filter_delay = 250
 Paste.default_mode = "Plain Text"
 Paste.modal_type = ""
-Paste.max_content_size = 500000
+Paste.max_content_length = 500000
+Paste.max_comment_length = 200
 Paste.render_mode = false
 Paste.render_delay = 1000
-Paste.max_comment_length = 200
 Paste.is_loading = true
 
 Paste.default_render_source = `
@@ -65,18 +66,19 @@ Paste.init = function()
 	Paste.audio_succ2 = document.getElementById("paste_audio_succ2")
 	Paste.comment_content = document.getElementById("paste_comment_content")
 	Paste.loading = document.getElementById("paste_loading")
-	
-	Paste.create_editor()
+	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
+	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
 
 	if(Paste.saved)
 	{
-		Paste.show_footer_message("Paste Succesfully Saved", true)
-		Paste.play_audio("succ")
+		Paste.show_save_success()
 	}
-
+	
+	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_paste_history()
 	Paste.get_mode_history()
+	Paste.get_tokens()
 	Paste.check_paste_history()
 	Paste.prepare_modes()
 	Paste.set_default_mode()
@@ -88,6 +90,7 @@ Paste.init = function()
 	Paste.setup_window_load()
 	Paste.stop_loading_mode()
 	Paste.setup_render()
+	Paste.check_ownership()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -128,8 +131,18 @@ Paste.clear_textarea = function()
 	Paste.set_value("")
 }
 
-Paste.save_paste = function()
+Paste.update_paste = function()
 {
+	Paste.save_paste(true)
+}
+
+Paste.save_paste = function(update=false)
+{
+	if(update && !Paste.owner)
+	{
+		return false
+	}
+
 	Paste.editor.focus()
 
 	let content = Paste.get_value()
@@ -141,7 +154,7 @@ Paste.save_paste = function()
 		return false
 	}
 
-	if(content.length > Paste.max_content_size)
+	if(content.length > Paste.max_content_length)
 	{
 		Paste.show_footer_message("Paste Is Too Big", false)
 		Paste.play_audio("nope")
@@ -162,14 +175,21 @@ Paste.save_paste = function()
 		return false
 	}
 
+	let token
+
+	if(update)
+	{
+		token = Paste.get_token_by_url(Paste.url)
+	}
+
+	else
+	{
+		token = ""
+	}
+
 	Paste.posting = true
 
-	setTimeout(function()
-	{
-		Paste.posting = false
-	}, 10000)
-
-	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name, comment:Paste.get_comment()})
+	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name, comment:Paste.get_comment(), token:token})
 }
 
 Paste.send_post = function(target, data)
@@ -194,12 +214,13 @@ Paste.send_post = function(target, data)
 	// Define what happens on successful data submission
 	XHR.addEventListener('load', function(event, data) 
 	{
-
+		Paste.posting = false
 	})	
 
 	// Define what happens in case of error
 	XHR.addEventListener('error', function(event) 
 	{
+		Paste.posting = false
 		console.error('Oops! Something goes wrong.')
 	})
 
@@ -218,10 +239,24 @@ Paste.send_post = function(target, data)
 				if(XHR.response)
 				{
 					let url = XHR.response["url"]
-					
+					let token = XHR.response["token"]
+
+					if(url && token)
+					{
+						Paste.push_to_tokens(url, token)
+					}
+
 					if(url)
 					{
-						Paste.go_to_location(`${url}?saved=true`)
+						if(url === Paste.url)
+						{
+							Paste.after_update()
+						}
+
+						else
+						{
+							Paste.go_to_location(`${url}?saved=true`)
+						}
 					}
 				}
 			}
@@ -364,6 +399,21 @@ Paste.get_paste_history_item_index = function(url)
 	}
 
 	return -1
+}
+
+Paste.after_update = function()
+{
+	Paste.initial_value = Paste.get_value()
+	Paste.initial_mode_name = Paste.mode_name
+	Paste.comment = Paste.get_comment()
+	Paste.update_paste_history()
+	Paste.show_save_success(true)
+}
+
+Paste.update_paste_history = function()
+{
+	Paste.check_paste_history()
+	Paste.paste_history_string = ""
 }
 
 Paste.check_paste_history = function()
@@ -1188,7 +1238,7 @@ Paste.modal_item_down = function()
 
 Paste.paste_is_modified = function()
 {
-	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.original_mode_name && Paste.get_comment() === Paste.comment)
+	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.initial_mode_name && Paste.get_comment() === Paste.comment)
 	{
 		return false
 	}
@@ -1268,4 +1318,78 @@ Paste.get_random_string = function(n)
 	}
 
 	return text
+}
+
+Paste.get_token_by_url = function(url)
+{
+	return Paste.tokens.items[url] || ""
+}
+
+Paste.get_tokens = function()
+{
+	Paste.tokens = Paste.get_local_storage(Paste.ls_tokens)
+
+	if(Paste.tokens === null)
+	{
+		Paste.tokens = {}
+	}
+
+	let changed = false
+
+	if(Paste.tokens.items === undefined)
+	{
+		Paste.tokens.items = {}
+
+		changed = true
+	}
+
+	if(changed)
+	{
+		Paste.save_tokens()
+	}
+}
+
+Paste.save_tokens = function()
+{
+	Paste.save_local_storage(Paste.ls_tokens, Paste.tokens)
+}
+
+Paste.push_to_tokens = function(url, token, save=true)
+{
+	Paste.tokens.items[url] = token
+
+	if(save)
+	{
+		Paste.save_tokens()
+	}
+}
+
+Paste.check_ownership = function()
+{
+	if(Paste.get_token_by_url(Paste.url))
+	{
+		Paste.owner = true
+		Paste.toolbar_update.style.display = "flex"
+	}
+
+	else
+	{
+		Paste.owner = false
+		Paste.toolbar_update.style.display = "none"
+	}
+}
+
+Paste.show_save_success = function(update=false)
+{
+	if(update)
+	{
+		Paste.show_footer_message("Paste Updated Succesfully", true)
+	}
+
+	else
+	{
+		Paste.show_footer_message("Paste Saved Succesfully", true)
+	}
+
+	Paste.play_audio("succ")
 }

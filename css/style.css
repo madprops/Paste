@@ -104,6 +104,12 @@ body, html
 	font-size: 1.1rem;
 }
 
+.paste_disabled
+{
+	opacity: 0.5;
+	pointer-events: none;
+}
+
 .paste_border_left
 {
 	border-left: 2px solid #515168;
