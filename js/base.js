@@ -1118,14 +1118,6 @@ Paste.activate_key_detection = function()
 			}
 		}
 
-		else if(document.activeElement === Paste.comment_content)
-		{
-			if(e.key === "Enter")
-			{
-				Paste.save_paste()
-			}
-		}
-
 		else
 		{
 			if(e.key === "Escape")
