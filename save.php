@@ -154,9 +154,19 @@ if($update)
 	$statement->bindValue(1, $token);
 	$result = $statement->execute();
 	$array = $result->fetchArray(SQLITE3_ASSOC);
-	$code = $array["code"];
-	$revision = $array["revision"];
-	$url = $code . "-" . $revision;
+	$num_rows = $array['count'];
+
+	if($num_rows > 0)
+	{
+		$code = $array["code"];
+		$revision = $array["revision"];
+		$url = $code . "-" . $revision;
+	}
+
+	else
+	{
+		exit();
+	}
 }
 
 else
