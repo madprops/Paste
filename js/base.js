@@ -599,7 +599,7 @@ Paste.do_modal_filter = function(value)
 {
 	let lc_value = Paste.clean_string2(value).toLowerCase()
 
-	let items = Array.from(document.querySelectorAll(".paste_history_item"))
+	let items = Array.from(document.querySelectorAll(".paste_modal_item"))
 
 	let words = lc_value.split(" ")
 
@@ -620,7 +620,7 @@ Paste.do_modal_filter = function(value)
 
 		if(found)
 		{
-			item.style.display = "initial"
+			item.style.display = "block"
 		}
 
 		else
