@@ -82,21 +82,21 @@
 <head>
 	<title><?php echo $title ?></title>
 	<link rel="icon" type="image/png" href="/favicon.png"/>
-	<link rel='stylesheet' href='codemirror/lib/codemirror.css'>
-	<link rel='stylesheet' href='codemirror/theme/dracula.css'>
-	<link rel='stylesheet' href='codemirror/addon/scroll/simplescrollbars.css'>
-	<link rel='stylesheet' href='css/perfect-scrollbar.css'>
-	<link rel='stylesheet' href='css/style.css?version=29'>
-	<script src='codemirror/lib/codemirror.js'></script>
-	<script src='codemirror/addon/mode/overlay.js'></script>
-	<script src='codemirror/addon/mode/simple.js'></script>
-	<script src='codemirror/addon/mode/multiplex.js'></script>
-	<script src='codemirror/addon/mode/loadmode.js'></script>
-	<script src='codemirror/mode/mode_bundle_min.js'></script>
-	<script src='codemirror/mode/meta.js'></script>
-	<script src='codemirror/addon/scroll/simplescrollbars.js'></script>
-	<script src='js/perfect-scrollbar.min.js'></script>
-	<script src='js/base.js?version=68'></script>
+	<link rel="stylesheet" href='/codemirror/lib/codemirror.css'>
+	<link rel="stylesheet" href='/codemirror/theme/dracula.css'>
+	<link rel="stylesheet" href='/codemirror/addon/scroll/simplescrollbars.css'>
+	<link rel="stylesheet" href='/css/perfect-scrollbar.css'>
+	<link rel="stylesheet" href='/css/style.css?version=30'>
+	<script src='/codemirror/lib/codemirror.js'></script>
+	<script src='/codemirror/addon/mode/overlay.js'></script>
+	<script src='/codemirror/addon/mode/simple.js'></script>
+	<script src='/codemirror/addon/mode/multiplex.js'></script>
+	<script src='/codemirror/addon/mode/loadmode.js'></script>
+	<script src='/codemirror/mode/mode_bundle_min.js'></script>
+	<script src='/codemirror/mode/meta.js'></script>
+	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
+	<script src='/js/perfect-scrollbar.min.js'></script>
+	<script src='/js/base.js?version=69'></script>
 	<script>
 		window.onload = function()
 		{
@@ -147,7 +147,7 @@
 	</div>
 
 	<div id='paste_loading' class='paste_unselectable'>
-		<div>Loading</div>
+		<div id='paste_loading_content'>Loading</div>
 	</div>
 
 	<div id='paste_overlay' onclick='Paste.hide_modal()'></div>

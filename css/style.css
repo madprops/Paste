@@ -408,7 +408,7 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 	justify-content: center;
 }
 
-#paste_loading div
+#paste_loading_content
 {
 	color: #dfdfdf;
 	font-size: 2rem;
