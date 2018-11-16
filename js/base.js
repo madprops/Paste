@@ -479,6 +479,13 @@ Paste.make_paste_history_string = function()
 	{
 		let item = Paste.paste_history.items[i]
 
+		let info = ""
+
+		if(Paste.get_token_by_url(Paste.url))
+		{
+			info = " (Owner)"
+		}
+
 		s += `<a class='paste_modal_item paste_history_item paste_unselectable' 
 		href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
 
@@ -491,7 +498,7 @@ Paste.make_paste_history_string = function()
 
 		if(item.mode_name)
 		{
-			s += `<div class='paste_history_item_mode_name'>(${item.mode_name})</div>`
+			s += `<div class='paste_history_item_mode_name'>(${item.mode_name})${info}</div>`
 		}
 		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
@@ -1230,7 +1237,13 @@ Paste.modal_item_down = function()
 
 Paste.paste_is_modified = function()
 {
-	if(Paste.get_value() === Paste.initial_value && Paste.mode_name === Paste.initial_mode_name && Paste.get_comment() === Paste.comment)
+	if
+	( 
+		Paste.owner && 
+		Paste.get_value() === Paste.initial_value && 
+		Paste.mode_name === Paste.initial_mode_name && 
+		Paste.get_comment() === Paste.comment
+	)
 	{
 		return false
 	}

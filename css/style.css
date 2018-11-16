@@ -332,6 +332,12 @@ a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:l
 	width: 80%;
 }
 
+.paste_history_item_owner
+{
+	color: #b2adb1;
+	font-size: 1rem;
+}
+
 .paste_history_item_url
 {
 	color: white;

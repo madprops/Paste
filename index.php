@@ -96,7 +96,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=70'></script>
+	<script src='/js/base.js?version=71'></script>
 	<script>
 		window.onload = function()
 		{
@@ -164,8 +164,8 @@
 
 	<div id='paste_footer' class='paste_unselectable'></div>
 
-	<audio id='paste_audio_nope' src='/audio/nope.mp3?version=1'>
-	<audio id='paste_audio_succ' src='/audio/succ.mp3?version=1'>
-	<audio id='paste_audio_succ2' src='/audio/succ2.mp3?version=1'>
+	<audio id="paste_audio_nope" src="/audio/nope.mp3?version=1">
+	<audio id="paste_audio_succ" src="/audio/succ.mp3?version=1">
+	<audio id="paste_audio_succ2" src="/audio/succ2.mp3?version=1">
 </body>
 </html>
