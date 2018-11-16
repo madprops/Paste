@@ -150,13 +150,12 @@ else
 
 if($update)
 {	
-	$statement = $db->prepare('SELECT * FROM "pastes" WHERE "token" = ?');
+	$statement = $db->prepare('SELECT code, revision FROM "pastes" WHERE "token" = ?');
 	$statement->bindValue(1, $token);
 	$result = $statement->execute();
 	$array = $result->fetchArray(SQLITE3_ASSOC);
-	$num_rows = $array['count'];
 
-	if($num_rows > 0)
+	if($array != false)
 	{
 		$code = $array["code"];
 		$revision = $array["revision"];
