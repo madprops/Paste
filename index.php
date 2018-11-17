@@ -90,14 +90,13 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=77'></script>
+	<script src='/js/base.js?version=78'></script>
 	<script>
 		window.onload = function()
 		{
 			Paste.url = <?php echo json_encode($url); ?>;
 			Paste.initial_content = <?php echo json_encode($content); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;
-			Paste.initial_mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.mode_name = <?php echo json_encode($mode_name); ?>;
 			Paste.comment = <?php echo json_encode($comment); ?>;
 			Paste.init()

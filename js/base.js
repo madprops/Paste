@@ -425,6 +425,7 @@ Paste.after_save = function(url)
 	Paste.initial_mode_name = Paste.mode_name
 	Paste.comment = Paste.get_comment()
 	Paste.update_paste_history()
+	Paste.check_ownership()
 
 	if(!update)
 	{
@@ -952,13 +953,15 @@ Paste.set_default_mode = function()
 {
 	if(Paste.mode_name)
 	{
-		Paste.change_mode(Paste.mode_name)
+		Paste.initial_mode_name = Paste.mode_name
 	}
 
 	else
 	{
-		Paste.change_mode(Paste.default_mode)
+		Paste.initial_mode_name = Paste.default_mode
 	}
+	
+	Paste.change_mode(Paste.initial_mode_name)
 }
 
 Paste.remove_non_alphanumeric = function(s)
@@ -1244,7 +1247,6 @@ Paste.paste_is_modified = function()
 {
 	if
 	( 
-		Paste.owner && 
 		Paste.get_content() === Paste.initial_content && 
 		Paste.mode_name === Paste.initial_mode_name && 
 		Paste.get_comment() === Paste.comment
