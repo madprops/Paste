@@ -69,11 +69,6 @@ Paste.init = function()
 	Paste.loading = document.getElementById("paste_loading")
 	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
 	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
-
-	if(Paste.saved)
-	{
-		Paste.show_save_success()
-	}
 	
 	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
@@ -262,15 +257,7 @@ Paste.send_post = function(target, data)
 
 					if(url)
 					{
-						if(url === Paste.url)
-						{
-							Paste.after_update()
-						}
-
-						else
-						{
-							Paste.go_to_location(`${url}?saved=true`)
-						}
+						Paste.after_save(url)
 					}
 				}
 			}
@@ -339,6 +326,11 @@ Paste.show_footer_message = function(s, succ)
 Paste.remove_get_parameters_from_url = function()
 {
 	let url = window.location.href.split("?")[0]
+	Paste.replace_url(url)
+}
+
+Paste.replace_url = function(url)
+{
 	window.history.replaceState('object', document.title, url)
 }
 
@@ -415,13 +407,31 @@ Paste.get_paste_history_item_index = function(url)
 	return -1
 }
 
-Paste.after_update = function()
+Paste.after_save = function(url)
 {
+	let update 
+
+	if(url === Paste.url)
+	{
+		update = true
+	}
+
+	else
+	{
+		update = false
+	}
+
 	Paste.initial_content = Paste.get_content()
 	Paste.initial_mode_name = Paste.mode_name
 	Paste.comment = Paste.get_comment()
 	Paste.update_paste_history()
-	Paste.show_save_success(true)
+
+	if(!update)
+	{
+		Paste.replace_url(url)
+	}
+
+	Paste.show_save_success(update)
 }
 
 Paste.update_paste_history = function()
