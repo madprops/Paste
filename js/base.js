@@ -72,7 +72,6 @@ Paste.init = function()
 	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
 	
 	Paste.check_save()
-	Paste.setup_initial_content()
 	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_paste_history()
@@ -90,6 +89,7 @@ Paste.init = function()
 	Paste.stop_loading_mode()
 	Paste.setup_render()
 	Paste.check_ownership()
+	Paste.setup_original_values()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -396,7 +396,7 @@ Paste.push_to_paste_history = function(save=true)
 {
 	let index = Paste.get_paste_history_item_index(Paste.url)
 
-	let obj = {url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name, comment:Paste.comment}
+	let obj = {url:Paste.url, sample:Paste.get_sample(), mode_name:Paste.mode_name, comment:Paste.initial_comment}
 
 	if(index === -1)
 	{
@@ -442,7 +442,7 @@ Paste.after_update = function()
 	Paste.updated = true
 	Paste.initial_content = Paste.get_content()
 	Paste.initial_mode_name = Paste.mode_name
-	Paste.comment = Paste.get_comment()
+	Paste.initial_comment = Paste.get_comment()
 	Paste.update_paste_history()
 	Paste.show_save_success(true)
 }
@@ -1257,27 +1257,13 @@ Paste.modal_item_down = function()
 
 Paste.paste_is_modified = function(update=false)
 {
-	if(!update)
-	{
-		if(Paste.updated)
-		{
-			if(Paste.get_content() === Paste.original_content)
-			{
-				return false
-			}
-
-			else
-			{
-				return true
-			}
-		}
-	}
+	let type = update ? "initial" : "original"
 
 	if
 	(
-		Paste.get_content() === Paste.initial_content && 
-		Paste.mode_name === Paste.initial_mode_name && 
-		Paste.get_comment() === Paste.comment
+		Paste.get_content() === Paste[`${type}_content`] && 
+		Paste.mode_name === Paste[`${type}_mode_name`] && 
+		Paste.get_comment() === Paste[`${type}_comment`]
 	)
 	{
 		return false
@@ -1305,7 +1291,7 @@ Paste.set_content = function(s)
 
 Paste.setup_comment = function()
 {
-	Paste.comment_content.innerText = Paste.comment
+	Paste.comment_content.innerText = Paste.initial_comment
 
 	Paste.comment_content.addEventListener("blur", function()
 	{
@@ -1332,7 +1318,7 @@ Paste.setup_window_load = function()
 {
 	window.onbeforeunload = function()
 	{
-		if(!Paste.leaving && Paste.paste_is_modified())
+		if(!Paste.leaving && Paste.paste_is_modified(Paste.updated))
 		{
 			return "Are you sure?"
 		}
@@ -1467,7 +1453,9 @@ Paste.check_save = function()
 	}
 }
 
-Paste.setup_initial_content = function()
+Paste.setup_original_values = function()
 {
 	Paste.original_content = Paste.initial_content
+	Paste.original_mode_name = Paste.initial_mode_name
+	Paste.original_comment = Paste.initial_comment
 }
