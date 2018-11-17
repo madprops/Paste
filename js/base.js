@@ -1261,8 +1261,9 @@ Paste.paste_is_modified = function(update=false)
 
 	if
 	(
-		Paste.get_content() === Paste[`${type}_content`] && 
-		Paste.mode_name === Paste[`${type}_mode_name`] && 
+		Paste.owner &&
+		Paste.get_content() === Paste[`${type}_content`] &&
+		Paste.mode_name === Paste[`${type}_mode_name`] &&
 		Paste.get_comment() === Paste[`${type}_comment`]
 	)
 	{
