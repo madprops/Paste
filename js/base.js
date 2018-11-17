@@ -421,6 +421,7 @@ Paste.after_save = function(url)
 		update = false
 	}
 
+	Paste.url = url
 	Paste.initial_content = Paste.get_content()
 	Paste.initial_mode_name = Paste.mode_name
 	Paste.comment = Paste.get_comment()
