@@ -90,7 +90,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=80'></script>
+	<script src='/js/base.js?version=81'></script>
 	<script>
 		window.onload = function()
 		{

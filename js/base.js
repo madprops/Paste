@@ -197,13 +197,43 @@ Paste.save_paste = function(update=false)
 		token = ""
 	}
 
-	Paste.posting = true
+	let onsuccess = function(response)
+	{
+		let url = response["url"]
+		let token = response["token"]
 
-	Paste.send_post("save.php", {content:content, mode_name:Paste.mode_name, comment:Paste.get_comment(), token:token})
+		if(url && token)
+		{
+			Paste.push_to_tokens(url, token)
+		}
+
+		if(url)
+		{
+			if(url === Paste.url)
+			{
+				Paste.after_update()
+			}
+
+			else
+			{
+				Paste.go_to_location(`${url}?saved=true`)
+			}
+		}
+	}
+
+	Paste.send_post("save.php", 
+	{
+		content: content, 
+		mode_name: Paste.mode_name, 
+		comment: Paste.get_comment(), 
+		token: token
+	}, onsuccess)
 }
 
-Paste.send_post = function(target, data)
+Paste.send_post = function(target, data, onsuccess)
 {
+	Paste.posting = true
+
 	let XHR = new XMLHttpRequest()
 	let urlEncodedData = ""
 	let urlEncodedDataPairs = []
@@ -248,26 +278,7 @@ Paste.send_post = function(target, data)
 			{
 				if(XHR.response)
 				{
-					let url = XHR.response["url"]
-					let token = XHR.response["token"]
-
-					if(url && token)
-					{
-						Paste.push_to_tokens(url, token)
-					}
-
-					if(url)
-					{
-						if(url === Paste.url)
-						{
-							Paste.after_update()
-						}
-
-						else
-						{
-							Paste.go_to_location(`${url}?saved=true`)
-						}
-					}
+					onsuccess(XHR.response)
 				}
 			}
 		}
