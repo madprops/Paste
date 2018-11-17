@@ -500,8 +500,9 @@ Paste.make_paste_history_string = function()
 			info = " (Owner)"
 		}
 
-		s += `<a class='paste_modal_item paste_history_item paste_unselectable' 
-		href='${item.url}' onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
+		s += `<div class='paste_modal_item paste_history_item paste_unselectable' 
+		onclick='Paste.on_history_item_click("${item.url}")' 
+		onmouseenter='Paste.on_modal_item_mouseenter(this)'>`
 
 		if(item.comment)
 		{
@@ -516,7 +517,7 @@ Paste.make_paste_history_string = function()
 		}
 		
 		s += `<div class='paste_history_item_sample'>${Paste.make_safe(item.sample)}</div>`
-		s += `</a>`
+		s += `</div>`
 	}
 	
 	s += "<div class='spacer1'></div>"
@@ -1411,4 +1412,9 @@ Paste.show_save_success = function(update=false)
 	}
 
 	Paste.play_audio("succ")
+}
+
+Paste.on_history_item_click = function(url)
+{
+	Paste.go_to_location(url)
 }

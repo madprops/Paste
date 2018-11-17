@@ -322,13 +322,14 @@ body, html
 	height: 1px;
 }
 
-a.paste_history_item:hover, a.paste_history_item:visited, a.paste_history_item:link
+.paste_history_item
 {
 	color: black;
 	font-size: 1.2rem;
 	text-decoration: none;
 	margin-bottom: 2rem;
 	width: 80%;
+	cursor: pointer;
 }
 
 .paste_history_item_owner
