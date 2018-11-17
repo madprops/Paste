@@ -70,6 +70,7 @@ Paste.init = function()
 	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
 	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
 	
+	Paste.check_save()
 	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_paste_history()
@@ -257,7 +258,15 @@ Paste.send_post = function(target, data)
 
 					if(url)
 					{
-						Paste.after_save(url)
+						if(url === Paste.url)
+						{
+							Paste.after_update()
+						}
+
+						else
+						{
+							Paste.go_to_location(`${url}?saved=true`)
+						}
 					}
 				}
 			}
@@ -326,12 +335,20 @@ Paste.show_footer_message = function(s, succ)
 Paste.remove_get_parameters_from_url = function()
 {
 	let url = window.location.href.split("?")[0]
-	Paste.replace_url(url)
+	Paste.change_url(url)
 }
 
-Paste.replace_url = function(url)
+Paste.change_url = function(url, replace=true)
 {
-	window.history.replaceState('object', document.title, url)
+	if(replace)
+	{
+		window.history.replaceState('object', document.title, url)
+	}
+
+	else
+	{
+		window.history.pushState('object', document.title, url)
+	}
 }
 
 Paste.get_paste_history = function()
@@ -407,33 +424,13 @@ Paste.get_paste_history_item_index = function(url)
 	return -1
 }
 
-Paste.after_save = function(url)
+Paste.after_update = function()
 {
-	let update 
-
-	if(url === Paste.url)
-	{
-		update = true
-	}
-
-	else
-	{
-		update = false
-	}
-
-	Paste.url = url
 	Paste.initial_content = Paste.get_content()
 	Paste.initial_mode_name = Paste.mode_name
 	Paste.comment = Paste.get_comment()
 	Paste.update_paste_history()
-	Paste.check_ownership()
-
-	if(!update)
-	{
-		Paste.replace_url(url)
-	}
-
-	Paste.show_save_success(update)
+	Paste.show_save_success(true)
 }
 
 Paste.update_paste_history = function()
@@ -1430,4 +1427,12 @@ Paste.show_save_success = function(update=false)
 Paste.on_history_item_click = function(url)
 {
 	Paste.go_to_location(url)
+}
+
+Paste.check_save = function()
+{
+	if(Paste.saved)
+	{
+		Paste.show_save_success()
+	}
 }
