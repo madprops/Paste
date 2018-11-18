@@ -89,7 +89,6 @@ Paste.init = function()
 	Paste.stop_loading_mode()
 	Paste.setup_render()
 	Paste.check_ownership()
-	Paste.setup_original_values()
 
 	Paste.editor.refresh()
 	Paste.editor.focus()
@@ -169,13 +168,6 @@ Paste.save_paste = function(update=false)
 	if(content.length > Paste.max_content_length)
 	{
 		Paste.show_footer_message("Paste Is Too Big", false)
-		Paste.play_audio("nope")
-		return false
-	}
-
-	if(!Paste.paste_is_modified(update))
-	{
-		Paste.show_footer_message("Nothing Has Changed", false)
 		Paste.play_audio("nope")
 		return false
 	}
@@ -1255,16 +1247,13 @@ Paste.modal_item_down = function()
 	}
 }
 
-Paste.paste_is_modified = function(update=false)
+Paste.paste_is_modified = function()
 {
-	let type = update ? "initial" : "original"
-
 	if
 	(
-		Paste.owner &&
-		Paste.get_content() === Paste[`${type}_content`] &&
-		Paste.mode_name === Paste[`${type}_mode_name`] &&
-		Paste.get_comment() === Paste[`${type}_comment`]
+		Paste.get_content() === Paste.initial_content &&
+		Paste.mode_name === Paste.initial_mode_name &&
+		Paste.get_comment() === Paste.initial_comment
 	)
 	{
 		return false
@@ -1319,7 +1308,7 @@ Paste.setup_window_load = function()
 {
 	window.onbeforeunload = function()
 	{
-		if(!Paste.leaving && Paste.paste_is_modified(Paste.updated))
+		if(!Paste.leaving && Paste.paste_is_modified())
 		{
 			return "Are you sure?"
 		}
@@ -1452,11 +1441,4 @@ Paste.check_save = function()
 	{
 		Paste.show_save_success()
 	}
-}
-
-Paste.setup_original_values = function()
-{
-	Paste.original_content = Paste.initial_content
-	Paste.original_mode_name = Paste.initial_mode_name
-	Paste.original_comment = Paste.initial_comment
 }
