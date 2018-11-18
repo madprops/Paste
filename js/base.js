@@ -925,6 +925,11 @@ Paste.do_change_mode = function(name, mode)
 
 Paste.get_mode_by_name = function(name)
 {
+	if(!name)
+	{
+		return false
+	}
+	
 	for(let mode of Paste.modes_array)
 	{
 		if(mode.name === name)
@@ -955,7 +960,9 @@ Paste.change_mode = function(name, hide_modal=false)
 
 Paste.set_default_mode = function()
 {
-	if(Paste.mode_name)
+	let exists = Paste.get_mode_by_name(Paste.mode_name)
+
+	if(exists)
 	{
 		Paste.initial_mode_name = Paste.mode_name
 	}
