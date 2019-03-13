@@ -166,7 +166,7 @@ body, html
 	flex: 1 1 50%;
 	position: relative;
 	height: 100%;
-	font: 400 1.2rem sans-serif;
+	font: 400 18px monospace;
 	opacity: 0.95;
 }
 

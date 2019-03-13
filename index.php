@@ -80,7 +80,7 @@
 	<link rel="stylesheet" href='/codemirror/theme/dracula.css'>
 	<link rel="stylesheet" href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel="stylesheet" href='/css/perfect-scrollbar.css'>
-	<link rel="stylesheet" href='/css/style.css?version=34'>
+	<link rel="stylesheet" href='/css/style.css?version=35'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
