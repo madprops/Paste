@@ -80,7 +80,6 @@ Paste.init = function()
 	Paste.check_paste_history()
 	Paste.prepare_modes()
 	Paste.set_default_mode()
-	Paste.start_scrollbars()
 	Paste.setup_modal()
 	Paste.activate_key_detection()
 	Paste.remove_content_background()
@@ -106,7 +105,6 @@ Paste.create_editor = function()
 		lineNumbers: true,
 		theme: "nord",
 		indentWithTabs: true,
-		scrollbarStyle: "simple",
 		tabSize: 4,
 		lineWrapping: true,
 		indentUnit: 4
@@ -677,7 +675,6 @@ Paste.do_modal_filter = function(value)
 
 Paste.after_filter = function()
 {
-	Paste.update_modal_scrollbar()
 	Paste.scroll_modal_to_top()
 	Paste.highlight_first_modal_item()
 }
@@ -711,7 +708,6 @@ Paste.show_modal = function(html, title)
 	Paste.modal_inner.innerHTML = html
 	Paste.overlay.style.display = "block"
 	Paste.modal.style.display = "flex"
-	Paste.update_modal_scrollbar()
 	Paste.scroll_modal_to_top()
 	Paste.modal_filter.focus()
 	Paste.modal_type = title
@@ -978,29 +974,6 @@ Paste.set_default_mode = function()
 Paste.remove_non_alphanumeric = function(s)
 {
 	return s.replace(/[\W_]+/g, "");
-}
-
-Paste.start_scrollbars = function()
-{
-	Paste.modal_scrollbar = new PerfectScrollbar("#paste_modal_inner",
-	{
-		minScrollbarLength: 50,
-		suppressScrollX: true,
-		scrollingThreshold: 3000,
-		wheelSpeed: 0.8,
-		handlers: ['drag-thumb', 'wheel', 'touch']
-	})
-}
-
-Paste.update_modal_scrollbar = function()
-{
-	if(Paste.modal_scrollbar !== undefined)
-	{
-		if(Paste.modal_scrollbar.element !== null)
-		{
-			Paste.modal_scrollbar.update()
-		}
-	}
 }
 
 Paste.get_mode_history = function()

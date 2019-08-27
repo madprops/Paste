@@ -176,12 +176,6 @@ body, html
 	padding-bottom: 12px !important;
 }
 
-.CodeMirror-simplescroll-vertical,
-.CodeMirror-simplescroll-horizontal
-{
-	width: 10px !important;
-}
-
 .paste_unselectable
 {
 	-webkit-touch-callout: none;
@@ -207,17 +201,6 @@ body, html
 	justify-content: center;
 	z-index: 999999999;
 	transition: bottom 500ms linear;
-}
-
-.CodeMirror-simplescroll-horizontal, .CodeMirror-simplescroll-vertical
-{
-	background-color: #373947;
-}
-
-.CodeMirror-simplescroll-horizontal div, .CodeMirror-simplescroll-vertical div
-{
-	background: #535672;
-	border: 0px solid #535672;;
 }
 
 #paste_overlay
