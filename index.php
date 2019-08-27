@@ -78,7 +78,7 @@
 	<link rel="icon" type="image/png" href="/favicon.png"/>
 	<link rel="stylesheet" href='/codemirror/lib/codemirror.css'>
 	<link rel="stylesheet" href='/codemirror/theme/nord.css'>
-	<link rel="stylesheet" href='/css/style.css?version=40'>
+	<link rel="stylesheet" href='/css/style.css?version=41'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>

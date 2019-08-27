@@ -226,7 +226,7 @@ body, html
 	color: white;
 	z-index: 9999999999;
 	width: 35rem;
-	height: 38rem;
+	height: 80%;
 	display: none;
 	overflow: hidden;
 	flex-direction: column;
