@@ -80,7 +80,7 @@
 	<link rel="stylesheet" href='/codemirror/theme/nord.css'>
 	<link rel="stylesheet" href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel="stylesheet" href='/css/perfect-scrollbar.css'>
-	<link rel="stylesheet" href='/css/style.css?version=36'>
+	<link rel="stylesheet" href='/css/style.css?version=38'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
