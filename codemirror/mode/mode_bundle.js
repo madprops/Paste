@@ -461,7 +461,7 @@ CodeMirror.defineMIME("text/apl", "apl");
  *    Description:  CodeMirror mode for Asterisk dialplan
  *
  *        Created:  05/17/2012 09:20:25 PM
- *       Revision:  none
+ *       Revision:  08/05/2019 AstLinux Project: Support block-comments
  *
  *         Author:  Stas Kobzar (stas@modulis.ca),
  *        Company:  Modulis.ca Inc.
@@ -519,7 +519,26 @@ CodeMirror.defineMode("asterisk", function() {
     var cur = '';
     var ch = stream.next();
     // comment
+    if (state.blockComment) {
+      if (ch == "-" && stream.match("-;", true)) {
+        state.blockComment = false;
+      } else if (stream.skipTo("--;")) {
+        stream.next();
+        stream.next();
+        stream.next();
+        state.blockComment = false;
+      } else {
+        stream.skipToEnd();
+      }
+      return "comment";
+    }
     if(ch == ";") {
+      if (stream.match("--", true)) {
+        if (!stream.match("-", false)) {  // Except ;--- is not a block comment
+          state.blockComment = true;
+          return "comment";
+        }
+      }
       stream.skipToEnd();
       return "comment";
     }
@@ -576,6 +595,7 @@ CodeMirror.defineMode("asterisk", function() {
   return {
     startState: function() {
       return {
+        blockComment: false,
         extenStart: false,
         extenSame:  false,
         extenInclude: false,
@@ -639,7 +659,11 @@ CodeMirror.defineMode("asterisk", function() {
       }
 
       return null;
-    }
+    },
+
+    blockCommentStart: ";--",
+    blockCommentEnd: "--;",
+    lineComment: ";"
   };
 });
 
@@ -1017,7 +1041,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
   // and those that end in _t (Reserved by POSIX for types)
   // http://www.gnu.org/software/libc/manual/html_node/Reserved-Names.html
   function cTypes(identifier) {
-    return contains(basicCTypes, identifier) || /.+_t/.test(identifier);
+    return contains(basicCTypes, identifier) || /.+_t$/.test(identifier);
   }
 
   // Returns true if identifier is a "Objective C" type.
@@ -1153,16 +1177,18 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
 
   def(["text/x-c++src", "text/x-c++hdr"], {
     name: "clike",
-    keywords: words(cKeywords + " dynamic_cast namespace reinterpret_cast try explicit new " +
-                    "static_cast typeid catch operator template typename class friend private " +
-                    "this using const_cast public throw virtual delete mutable protected " +
-                    "alignas alignof constexpr decltype nullptr noexcept thread_local final " +
-                    "static_assert override"),
+    // Keywords from https://en.cppreference.com/w/cpp/keyword includes C++20.
+    keywords: words(cKeywords + "alignas alignof and and_eq audit axiom bitand bitor catch " +
+                    "class compl concept constexpr const_cast decltype delete dynamic_cast " +
+                    "explicit export final friend import module mutable namespace new noexcept " +
+                    "not not_eq operator or or_eq override private protected public " +
+                    "reinterpret_cast requires static_assert static_cast template this " +
+                    "thread_local throw try typeid typename using virtual xor xor_eq"),
     types: cTypes,
-    blockKeywords: words(cBlockKeywords +" class try catch finally"),
+    blockKeywords: words(cBlockKeywords + " class try catch"),
     defKeywords: words(cDefKeywords + " class namespace"),
     typeFirstDefinitions: true,
-    atoms: words("true false NULL"),
+    atoms: words("true false NULL nullptr"),
     dontIndentStatements: /^template$/,
     isIdentifierChar: /[\w\$_~\xa1-\uffff]/,
     isReservedIdentifier: cIsReservedIdentifier,
@@ -1198,7 +1224,7 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
   def("text/x-java", {
     name: "clike",
     keywords: words("abstract assert break case catch class const continue default " +
-                    "do else enum extends final finally float for goto if implements import " +
+                    "do else enum extends final finally for goto if implements import " +
                     "instanceof interface native new package private protected public " +
                     "return static strictfp super switch synchronized this throw throws transient " +
                     "try volatile while @interface"),
@@ -1400,9 +1426,17 @@ CodeMirror.defineMode("clike", function(config, parserConfig) {
         stream.eatWhile(/[\w\$_]/);
         return "meta";
       },
+      '*': function(_stream, state) {
+        return state.prevToken == '.' ? 'variable' : 'operator';
+      },
       '"': function(stream, state) {
         state.tokenize = tokenKotlinString(stream.match('""'));
         return state.tokenize(stream, state);
+      },
+      "/": function(stream, state) {
+        if (!stream.eat("*")) return false;
+        state.tokenize = tokenNestedComment(1);
+        return state.tokenize(stream, state)
       },
       indent: function(state, ctx, textAfter, indentUnit) {
         var firstChar = textAfter && textAfter.charAt(0);
@@ -1778,7 +1812,7 @@ CodeMirror.defineMode("clojure", function (options) {
   var qualifiedSymbol = /^(?:(?:[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*(?:\.[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)*\/)?(?:\/|[^\\\/\[\]\d\s"#'(),;@^`{}~][^\\\[\]\s"(),;@^`{}~]*)*(?=[\\\[\]\s"(),;@^`{}~]|$))/;
 
   function base(stream, state) {
-    if (stream.eatSpace()) return ["space", null];
+    if (stream.eatSpace() || stream.eat(",")) return ["space", null];
     if (stream.match(numberLiteral)) return [null, "number"];
     if (stream.match(characterLiteral)) return [null, "string-2"];
     if (stream.eat(/^"/)) return (state.tokenize = inString)(stream, state);
@@ -3235,7 +3269,7 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       if (/[\d.]/.test(stream.peek())) {
         stream.eatWhile(/[\w.%]/);
         return ret("number", "unit");
-      } else if (stream.match(/^-[\w\\\-]+/)) {
+      } else if (stream.match(/^-[\w\\\-]*/)) {
         stream.eatWhile(/[\w\\\-]/);
         if (stream.match(/^\s*:/, false))
           return ret("variable-2", "variable-definition");
@@ -3249,12 +3283,11 @@ CodeMirror.defineMode("css", function(config, parserConfig) {
       return ret("qualifier", "qualifier");
     } else if (/[:;{}\[\]\(\)]/.test(ch)) {
       return ret(null, ch);
-    } else if (((ch == "u" || ch == "U") && stream.match(/rl(-prefix)?\(/i)) ||
-               ((ch == "d" || ch == "D") && stream.match("omain(", true, true)) ||
-               ((ch == "r" || ch == "R") && stream.match("egexp(", true, true))) {
-      stream.backUp(1);
-      state.tokenize = tokenParenthesized;
-      return ret("property", "word");
+    } else if (stream.match(/[\w-.]+(?=\()/)) {
+      if (/^(url(-prefix)?|domain|regexp)$/.test(stream.current().toLowerCase())) {
+        state.tokenize = tokenParenthesized;
+      }
+      return ret("variable callee", "variable");
     } else if (/[\w\\\-]/.test(ch)) {
       stream.eatWhile(/[\w\\\-]/);
       return ret("property", "word");
@@ -4455,6 +4488,15 @@ CodeMirror.defineMode("d", function(config, parserConfig) {
         if (!stream.eat("*")) return false
         state.tokenize = tokenNestedComment(1)
         return state.tokenize(stream, state)
+      },
+      token: function(stream, _, style) {
+        if (style == "variable") {
+          // Assume uppercase symbols are classes using variable-2
+          var isUpper = RegExp('^[_$]*[A-Z][a-zA-Z0-9_$]*$','g');
+          if (isUpper.test(stream.current())) {
+            return 'variable-2';
+          }
+        }
       }
     }
   });
@@ -8713,7 +8755,10 @@ CodeMirror.defineMode("groovy", function(config) {
 
     electricChars: "{}",
     closeBrackets: {triples: "'\""},
-    fold: "brace"
+    fold: "brace",
+    blockCommentStart: "/*",
+    blockCommentEnd: "*/",
+    lineComment: "//"
   };
 });
 
@@ -8896,9 +8941,13 @@ CodeMirror.defineMIME("text/x-groovy", "groovy");
 
   CodeMirror.defineSimpleMode("handlebars-tags", {
     start: [
+      { regex: /\{\{\{/, push: "handlebars_raw", token: "tag" },
       { regex: /\{\{!--/, push: "dash_comment", token: "comment" },
       { regex: /\{\{!/,   push: "comment", token: "comment" },
       { regex: /\{\{/,    push: "handlebars", token: "tag" }
+    ],
+    handlebars_raw: [
+      { regex: /\}\}\}/, pop: true, token: "tag" },
     ],
     handlebars: [
       { regex: /\}\}/, pop: true, token: "tag" },
@@ -9917,7 +9966,7 @@ CodeMirror.defineMIME("text/x-hxml", "hxml");
           return maybeBackup(stream, endTag, state.localMode.token(stream, state.localState));
         };
         state.localMode = mode;
-        state.localState = CodeMirror.startState(mode, htmlMode.indent(state.htmlState, ""));
+        state.localState = CodeMirror.startState(mode, htmlMode.indent(state.htmlState, "", ""));
       } else if (state.inTag) {
         state.inTag += stream.current()
         if (stream.eol()) state.inTag += " "
@@ -9947,7 +9996,7 @@ CodeMirror.defineMIME("text/x-hxml", "hxml");
 
       indent: function (state, textAfter, line) {
         if (!state.localMode || /^\s*<\//.test(textAfter))
-          return htmlMode.indent(state.htmlState, textAfter);
+          return htmlMode.indent(state.htmlState, textAfter, line);
         else if (state.localMode.indent)
           return state.localMode.indent(state.localState, textAfter, line);
         else
@@ -10434,7 +10483,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (ch == '"' || ch == "'") {
       state.tokenize = tokenString(ch);
       return state.tokenize(stream, state);
-    } else if (ch == "." && stream.match(/^\d+(?:[eE][+\-]?\d+)?/)) {
+    } else if (ch == "." && stream.match(/^\d[\d_]*(?:[eE][+\-]?[\d_]+)?/)) {
       return ret("number", "number");
     } else if (ch == "." && stream.match("..")) {
       return ret("spread", "meta");
@@ -10442,10 +10491,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       return ret(ch);
     } else if (ch == "=" && stream.eat(">")) {
       return ret("=>", "operator");
-    } else if (ch == "0" && stream.match(/^(?:x[\da-f]+|o[0-7]+|b[01]+)n?/i)) {
+    } else if (ch == "0" && stream.match(/^(?:x[\dA-Fa-f_]+|o[0-7_]+|b[01_]+)n?/)) {
       return ret("number", "number");
     } else if (/\d/.test(ch)) {
-      stream.match(/^\d*(?:n|(?:\.\d*)?(?:[eE][+\-]?\d+)?)?/);
+      stream.match(/^[\d_]*(?:n|(?:\.[\d_]*)?(?:[eE][+\-]?[\d_]+)?)?/);
       return ret("number", "number");
     } else if (ch == "/") {
       if (stream.eat("*")) {
@@ -10562,8 +10611,12 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
         ++depth;
       } else if (wordRE.test(ch)) {
         sawSomething = true;
-      } else if (/["'\/]/.test(ch)) {
-        return;
+      } else if (/["'\/`]/.test(ch)) {
+        for (;; --pos) {
+          if (pos == 0) return
+          var next = stream.string.charAt(pos - 1)
+          if (next == ch && stream.string.charAt(pos - 2) != "\\") { pos--; break }
+        }
       } else if (sawSomething && !depth) {
         ++pos;
         break;
@@ -10732,7 +10785,10 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
     if (type == "function") return cont(functiondef);
     if (type == "for") return cont(pushlex("form"), forspec, statement, poplex);
-    if (type == "class" || (isTS && value == "interface")) { cx.marked = "keyword"; return cont(pushlex("form"), className, poplex); }
+    if (type == "class" || (isTS && value == "interface")) {
+      cx.marked = "keyword"
+      return cont(pushlex("form", type == "class" ? type : value), className, poplex)
+    }
     if (type == "variable") {
       if (isTS && value == "declare") {
         cx.marked = "keyword"
@@ -10740,11 +10796,11 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       } else if (isTS && (value == "module" || value == "enum" || value == "type") && cx.stream.match(/^\s*\w/, false)) {
         cx.marked = "keyword"
         if (value == "enum") return cont(enumdef);
-        else if (value == "type") return cont(typeexpr, expect("operator"), typeexpr, expect(";"));
+        else if (value == "type") return cont(typename, expect("operator"), typeexpr, expect(";"));
         else return cont(pushlex("form"), pattern, expect("{"), pushlex("}"), block, poplex, poplex)
       } else if (isTS && value == "namespace") {
         cx.marked = "keyword"
-        return cont(pushlex("form"), expression, block, poplex)
+        return cont(pushlex("form"), expression, statement, poplex)
       } else if (isTS && value == "abstract") {
         cx.marked = "keyword"
         return cont(statement)
@@ -10919,6 +10975,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
         }, proceed);
       }
       if (type == end || value == end) return cont();
+      if (sep && sep.indexOf(";") > -1) return pass(what)
       return cont(expect(end));
     }
     return function(type, value) {
@@ -10941,6 +10998,9 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       if (value == "?") return cont(maybetype);
     }
   }
+  function maybetypeOrIn(type, value) {
+    if (isTS && (type == ":" || value == "in")) return cont(typeexpr)
+  }
   function mayberettype(type) {
     if (isTS && type == ":") {
       if (cx.stream.match(/^\s*\w+\s+is\b/, false)) return cont(expression, isKW, typeexpr)
@@ -10954,18 +11014,19 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     }
   }
   function typeexpr(type, value) {
-    if (value == "keyof" || value == "typeof") {
+    if (value == "keyof" || value == "typeof" || value == "infer") {
       cx.marked = "keyword"
-      return cont(value == "keyof" ? typeexpr : expressionNoComma)
+      return cont(value == "typeof" ? expressionNoComma : typeexpr)
     }
     if (type == "variable" || value == "void") {
       cx.marked = "type"
       return cont(afterType)
     }
+    if (value == "|" || value == "&") return cont(typeexpr)
     if (type == "string" || type == "number" || type == "atom") return cont(afterType);
     if (type == "[") return cont(pushlex("]"), commasep(typeexpr, "]", ","), poplex, afterType)
     if (type == "{") return cont(pushlex("}"), commasep(typeprop, "}", ",;"), poplex, afterType)
-    if (type == "(") return cont(commasep(typearg, ")"), maybeReturnType)
+    if (type == "(") return cont(commasep(typearg, ")"), maybeReturnType, afterType)
     if (type == "<") return cont(commasep(typeexpr, ">"), typeexpr)
   }
   function maybeReturnType(type) {
@@ -10975,24 +11036,28 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "variable" || cx.style == "keyword") {
       cx.marked = "property"
       return cont(typeprop)
-    } else if (value == "?") {
+    } else if (value == "?" || type == "number" || type == "string") {
       return cont(typeprop)
     } else if (type == ":") {
       return cont(typeexpr)
     } else if (type == "[") {
-      return cont(expression, maybetype, expect("]"), typeprop)
+      return cont(expect("variable"), maybetypeOrIn, expect("]"), typeprop)
+    } else if (type == "(") {
+      return pass(functiondecl, typeprop)
     }
   }
   function typearg(type, value) {
     if (type == "variable" && cx.stream.match(/^\s*[?:]/, false) || value == "?") return cont(typearg)
     if (type == ":") return cont(typeexpr)
+    if (type == "spread") return cont(typearg)
     return pass(typeexpr)
   }
   function afterType(type, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
     if (value == "|" || type == "." || value == "&") return cont(typeexpr)
-    if (type == "[") return cont(expect("]"), afterType)
+    if (type == "[") return cont(typeexpr, expect("]"), afterType)
     if (value == "extends" || value == "implements") { cx.marked = "keyword"; return cont(typeexpr) }
+    if (value == "?") return cont(typeexpr, expect(":"), typeexpr)
   }
   function maybeTypeArgs(_, value) {
     if (value == "<") return cont(pushlex(">"), commasep(typeexpr, ">"), poplex, afterType)
@@ -11022,6 +11087,7 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "variable") cx.marked = "property";
     if (type == "spread") return cont(pattern);
     if (type == "}") return pass();
+    if (type == "[") return cont(expression, expect(']'), expect(':'), proppattern);
     return cont(expect(":"), pattern, maybeAssign);
   }
   function eltpattern() {
@@ -11038,25 +11104,18 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
   }
   function forspec(type, value) {
     if (value == "await") return cont(forspec);
-    if (type == "(") return cont(pushlex(")"), forspec1, expect(")"), poplex);
+    if (type == "(") return cont(pushlex(")"), forspec1, poplex);
   }
   function forspec1(type) {
-    if (type == "var") return cont(vardef, expect(";"), forspec2);
-    if (type == ";") return cont(forspec2);
-    if (type == "variable") return cont(formaybeinof);
-    return pass(expression, expect(";"), forspec2);
-  }
-  function formaybeinof(_type, value) {
-    if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression); }
-    return cont(maybeoperatorComma, forspec2);
+    if (type == "var") return cont(vardef, forspec2);
+    if (type == "variable") return cont(forspec2);
+    return pass(forspec2)
   }
   function forspec2(type, value) {
-    if (type == ";") return cont(forspec3);
-    if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression); }
-    return pass(expression, expect(";"), forspec3);
-  }
-  function forspec3(type) {
-    if (type != ")") cont(expression);
+    if (type == ")") return cont()
+    if (type == ";") return cont(forspec2)
+    if (value == "in" || value == "of") { cx.marked = "keyword"; return cont(expression, forspec2) }
+    return pass(expression, forspec2)
   }
   function functiondef(type, value) {
     if (value == "*") {cx.marked = "keyword"; return cont(functiondef);}
@@ -11064,10 +11123,25 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, mayberettype, statement, popcontext);
     if (isTS && value == "<") return cont(pushlex(">"), commasep(typeparam, ">"), poplex, functiondef)
   }
+  function functiondecl(type, value) {
+    if (value == "*") {cx.marked = "keyword"; return cont(functiondecl);}
+    if (type == "variable") {register(value); return cont(functiondecl);}
+    if (type == "(") return cont(pushcontext, pushlex(")"), commasep(funarg, ")"), poplex, mayberettype, popcontext);
+    if (isTS && value == "<") return cont(pushlex(">"), commasep(typeparam, ">"), poplex, functiondecl)
+  }
+  function typename(type, value) {
+    if (type == "keyword" || type == "variable") {
+      cx.marked = "type"
+      return cont(typename)
+    } else if (value == "<") {
+      return cont(pushlex(">"), commasep(typeparam, ">"), poplex)
+    }
+  }
   function funarg(type, value) {
     if (value == "@") cont(expression, funarg)
     if (type == "spread") return cont(funarg);
     if (isTS && isModifier(value)) { cx.marked = "keyword"; return cont(funarg); }
+    if (isTS && type == "this") return cont(maybetype, maybeAssign)
     return pass(pattern, maybetype, maybeAssign);
   }
   function classExpression(type, value) {
@@ -11098,13 +11172,15 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
       cx.marked = "property";
       return cont(isTS ? classfield : functiondef, classBody);
     }
+    if (type == "number" || type == "string") return cont(isTS ? classfield : functiondef, classBody);
     if (type == "[")
       return cont(expression, maybetype, expect("]"), isTS ? classfield : functiondef, classBody)
     if (value == "*") {
       cx.marked = "keyword";
       return cont(classBody);
     }
-    if (type == ";") return cont(classBody);
+    if (isTS && type == "(") return pass(functiondecl, classBody)
+    if (type == ";" || type == ",") return cont(classBody);
     if (type == "}") return cont();
     if (value == "@") return cont(expression, classBody)
   }
@@ -11112,7 +11188,8 @@ CodeMirror.defineMode("javascript", function(config, parserConfig) {
     if (value == "?") return cont(classfield)
     if (type == ":") return cont(typeexpr, maybeAssign)
     if (value == "=") return cont(expressionNoComma)
-    return pass(functiondef)
+    var context = cx.state.lexical.prev, isInterface = context && context.info == "interface"
+    return pass(isInterface ? functiondecl : functiondef)
   }
   function afterExport(type, value) {
     if (value == "*") { cx.marked = "keyword"; return cont(maybeFrom, expect(";")); }
@@ -11407,6 +11484,8 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
       blockCommentEnd: "#}"
     };
   });
+
+  CodeMirror.defineMIME("text/jinja2", "jinja2");
 });
 // CodeMirror, copyright (c) by Marijn Haverbeke and others
 // Distributed under an MIT license: https://codemirror.net/LICENSE
@@ -11442,7 +11521,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     function flatXMLIndent(state) {
       var tagName = state.tagName
       state.tagName = null
-      var result = xmlMode.indent(state, "")
+      var result = xmlMode.indent(state, "", "")
       state.tagName = tagName
       return result
     }
@@ -11515,7 +11594,7 @@ CodeMirror.defineMIME("application/typescript", { name: "javascript", typescript
     function jsToken(stream, state, cx) {
       if (stream.peek() == "<" && jsMode.expressionAllowed(stream, cx.state)) {
         jsMode.skipExpression(cx.state)
-        state.context = new Context(CodeMirror.startState(xmlMode, jsMode.indent(cx.state, "")),
+        state.context = new Context(CodeMirror.startState(xmlMode, jsMode.indent(cx.state, "", "")),
                                     xmlMode, 0, state.context)
         return null
       }
@@ -11581,58 +11660,50 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
   var uChar = "([^\\u0027\\u005C\\uD800-\\uDFFF]|[\\uD800-\\uDFFF][\\uDC00-\\uDFFF])";
 
   var operators = parserConf.operators || wordRegexp([
-      "[<>]:", "[<>=]=", "<<=?", ">>>?=?", "=>", "->", "\\/\\/",
-      "[\\\\%*+\\-<>!=\\/^|&\\u00F7\\u22BB]=?", "\\?", "\\$", "~", ":",
-      "\\u00D7", "\\u2208", "\\u2209", "\\u220B", "\\u220C", "\\u2218",
-      "\\u221A", "\\u221B", "\\u2229", "\\u222A", "\\u2260", "\\u2264",
-      "\\u2265", "\\u2286", "\\u2288", "\\u228A", "\\u22C5",
-      "\\b(in|isa)\\b(?!\.?\\()"], "");
+        "[<>]:", "[<>=]=", "<<=?", ">>>?=?", "=>", "->", "\\/\\/",
+        "[\\\\%*+\\-<>!=\\/^|&\\u00F7\\u22BB]=?", "\\?", "\\$", "~", ":",
+        "\\u00D7", "\\u2208", "\\u2209", "\\u220B", "\\u220C", "\\u2218",
+        "\\u221A", "\\u221B", "\\u2229", "\\u222A", "\\u2260", "\\u2264",
+        "\\u2265", "\\u2286", "\\u2288", "\\u228A", "\\u22C5",
+        "\\b(in|isa)\\b(?!\.?\\()"], "");
   var delimiters = parserConf.delimiters || /^[;,()[\]{}]/;
   var identifiers = parserConf.identifiers ||
-      /^[_A-Za-z\u00A1-\u2217\u2219-\uFFFF][\w\u00A1-\u2217\u2219-\uFFFF]*!*/;
+        /^[_A-Za-z\u00A1-\u2217\u2219-\uFFFF][\w\u00A1-\u2217\u2219-\uFFFF]*!*/;
 
   var chars = wordRegexp([octChar, hexChar, sChar, uChar], "'");
 
-  var commonOpeners = ["begin", "function", "type", "struct", "immutable",
-      "let", "macro", "for", "while", "quote", "if", "else", "elseif", "try",
-                       "finally", "catch", "do"];
+  var openersList = ["begin", "function", "type", "struct", "immutable", "let",
+        "macro", "for", "while", "quote", "if", "else", "elseif", "try",
+        "finally", "catch", "do"];
 
-  var commonClosers = ["end", "else", "elseif", "catch", "finally"];
+  var closersList = ["end", "else", "elseif", "catch", "finally"];
 
-  var commonKeywords = ["if", "else", "elseif", "while", "for", "begin",
-                        "let", "end", "do", "try", "catch", "finally", "return", "break",
-                        "continue", "global", "local", "const", "export", "import", "importall",
-                        "using", "function", "where", "macro", "module", "baremodule", "struct",
-                        "type", "mutable", "immutable", "quote", "typealias", "abstract",
-                        "primitive", "bitstype"];
+  var keywordsList = ["if", "else", "elseif", "while", "for", "begin", "let",
+        "end", "do", "try", "catch", "finally", "return", "break", "continue",
+        "global", "local", "const", "export", "import", "importall", "using",
+        "function", "where", "macro", "module", "baremodule", "struct", "type",
+        "mutable", "immutable", "quote", "typealias", "abstract", "primitive",
+        "bitstype"];
 
-  var commonBuiltins = ["true", "false", "nothing", "NaN", "Inf"];
+  var builtinsList = ["true", "false", "nothing", "NaN", "Inf"];
 
-  CodeMirror.registerHelper("hintWords", "julia", commonKeywords.concat(commonBuiltins));
+  CodeMirror.registerHelper("hintWords", "julia", keywordsList.concat(builtinsList));
 
-  var openers = wordRegexp(commonOpeners);
-  var closers = wordRegexp(commonClosers);
-  var keywords = wordRegexp(commonKeywords);
-  var builtins = wordRegexp(commonBuiltins);
+  var openers = wordRegexp(openersList);
+  var closers = wordRegexp(closersList);
+  var keywords = wordRegexp(keywordsList);
+  var builtins = wordRegexp(builtinsList);
 
   var macro = /^@[_A-Za-z][\w]*/;
   var symbol = /^:[_A-Za-z\u00A1-\uFFFF][\w\u00A1-\uFFFF]*!*/;
   var stringPrefixes = /^(`|([_A-Za-z\u00A1-\uFFFF]*"("")?))/;
 
   function inArray(state) {
-    return inGenerator(state, '[')
+    return (state.nestedArrays > 0);
   }
 
-  function inGenerator(state, bracket, depth) {
-    if (typeof(bracket) === "undefined") { bracket = '('; }
-    if (typeof(depth)   === "undefined") { depth   = 0;   }
-    var scope = currentScope(state, depth);
-    if ((depth == 0 && scope === "if" && inGenerator(state, bracket, depth + 1)) ||
-        (scope === "for" && inGenerator(state, bracket, depth + 1)) ||
-        (scope === bracket)) {
-      return true;
-    }
-    return false;
+  function inGenerator(state) {
+    return (state.nestedGenerators > 0);
   }
 
   function currentScope(state, n) {
@@ -11684,16 +11755,19 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
 
     if (ch === '[') {
       state.scopes.push('[');
+      state.nestedArrays++;
     }
 
     if (ch === '(') {
       state.scopes.push('(');
+      state.nestedGenerators++;
     }
 
     if (inArray(state) && ch === ']') {
       if (currentScope(state) === "if") { state.scopes.pop(); }
       while (currentScope(state) === "for") { state.scopes.pop(); }
       state.scopes.pop();
+      state.nestedArrays--;
       state.leavingExpr = true;
     }
 
@@ -11701,6 +11775,7 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
       if (currentScope(state) === "if") { state.scopes.pop(); }
       while (currentScope(state) === "for") { state.scopes.pop(); }
       state.scopes.pop();
+      state.nestedGenerators--;
       state.leavingExpr = true;
     }
 
@@ -11714,14 +11789,12 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
     }
 
     var match;
-    if (match = stream.match(openers)) {
+    if (match = stream.match(openers, false)) {
       state.scopes.push(match[0]);
-      return "keyword";
     }
 
-    if (stream.match(closers)) {
+    if (stream.match(closers, false)) {
       state.scopes.pop();
-      return "keyword";
     }
 
     // Handle type annotations
@@ -11751,15 +11824,13 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
       var imMatcher = RegExp(/^im\b/);
       var numberLiteral = false;
       // Floats
-      if (stream.match(/^\d*\.(?!\.)\d*([Eef][\+\-]?\d+)?/i)) { numberLiteral = true; }
-      if (stream.match(/^\d+\.(?!\.)\d*/)) { numberLiteral = true; }
-      if (stream.match(/^\.\d+/)) { numberLiteral = true; }
-      if (stream.match(/^0x\.[0-9a-f]+p[\+\-]?\d+/i)) { numberLiteral = true; }
+      if (stream.match(/^(?:(?:\d[_\d]*)?\.(?!\.)(?:\d[_\d]*)?|\d[_\d]*\.(?!\.)(?:\d[_\d]*))?([Eef][\+\-]?[_\d]+)?/i)) { numberLiteral = true; }
+      if (stream.match(/^0x\.[0-9a-f_]+p[\+\-]?[_\d]+/i)) { numberLiteral = true; }
       // Integers
-      if (stream.match(/^0x[0-9a-f]+/i)) { numberLiteral = true; } // Hex
-      if (stream.match(/^0b[01]+/i)) { numberLiteral = true; } // Binary
-      if (stream.match(/^0o[0-7]+/i)) { numberLiteral = true; } // Octal
-      if (stream.match(/^[1-9]\d*(e[\+\-]?\d+)?/)) { numberLiteral = true; } // Decimal
+      if (stream.match(/^0x[0-9a-f_]+/i)) { numberLiteral = true; } // Hex
+      if (stream.match(/^0b[01_]+/i)) { numberLiteral = true; } // Binary
+      if (stream.match(/^0o[0-7_]+/i)) { numberLiteral = true; } // Octal
+      if (stream.match(/^[1-9][_\d]*(e[\+\-]?\d+)?/)) { numberLiteral = true; } // Decimal
       // Zero by itself with no other piece of number.
       if (stream.match(/^0(?![\dx])/i)) { numberLiteral = true; }
       if (numberLiteral) {
@@ -11865,13 +11936,13 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
   function tokenAnnotation(stream, state) {
     stream.match(/.*?(?=,|;|{|}|\(|\)|=|$|\s)/);
     if (stream.match(/^{/)) {
-      state.nestedLevels++;
-    } else if (stream.match(/^}/)) {
-      state.nestedLevels--;
+      state.nestedParameters++;
+    } else if (stream.match(/^}/) && state.nestedParameters > 0) {
+      state.nestedParameters--;
     }
-    if (state.nestedLevels > 0) {
+    if (state.nestedParameters > 0) {
       stream.match(/.*?(?={|})/) || stream.next();
-    } else if (state.nestedLevels == 0) {
+    } else if (state.nestedParameters == 0) {
       state.tokenize = tokenBase;
     }
     return "builtin";
@@ -11879,14 +11950,14 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
 
   function tokenComment(stream, state) {
     if (stream.match(/^#=/)) {
-      state.nestedLevels++;
+      state.nestedComments++;
     }
     if (!stream.match(/.*?(?=(#=|=#))/)) {
       stream.skipToEnd();
     }
     if (stream.match(/^=#/)) {
-      state.nestedLevels--;
-      if (state.nestedLevels == 0)
+      state.nestedComments--;
+      if (state.nestedComments == 0)
         state.tokenize = tokenBase;
     }
     return "comment";
@@ -11949,7 +12020,10 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
         lastToken: null,
         leavingExpr: false,
         isDefinition: false,
-        nestedLevels: 0,
+        nestedArrays: 0,
+        nestedComments: 0,
+        nestedGenerators: 0,
+        nestedParameters: 0,
         charsAdvanced: 0,
         firstParenPos: -1
       };
@@ -11980,6 +12054,7 @@ CodeMirror.defineMode("julia", function(config, parserConf) {
     blockCommentStart: "#=",
     blockCommentEnd: "=#",
     lineComment: "#",
+    closeBrackets: "()[]{}\"\"",
     fold: "indent"
   };
   return external;
@@ -16830,7 +16905,7 @@ function eatSuffix(stream, c){
       if (!isPHP) {
         if (stream.match(/^<\?\w*/)) {
           state.curMode = phpMode;
-          if (!state.php) state.php = CodeMirror.startState(phpMode, htmlMode.indent(state.html, ""))
+          if (!state.php) state.php = CodeMirror.startState(phpMode, htmlMode.indent(state.html, "", ""))
           state.curState = state.php;
           return "meta";
         }
@@ -16883,11 +16958,11 @@ function eatSuffix(stream, c){
 
       token: dispatch,
 
-      indent: function(state, textAfter) {
+      indent: function(state, textAfter, line) {
         if ((state.curMode != phpMode && /^\s*<\//.test(textAfter)) ||
             (state.curMode == phpMode && /^\?>/.test(textAfter)))
-          return htmlMode.indent(state.html, textAfter);
-        return state.curMode.indent(state.curState, textAfter);
+          return htmlMode.indent(state.html, textAfter, line);
+        return state.curMode.indent(state.curState, textAfter, line);
       },
 
       blockCommentStart: "/*",
@@ -18482,7 +18557,7 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
     var delimiters = parserConf.delimiters || parserConf.singleDelimiters || /^[\(\)\[\]\{\}@,:`=;\.\\]/;
     //               (Backwards-compatiblity with old, cumbersome config system)
     var operators = [parserConf.singleOperators, parserConf.doubleOperators, parserConf.doubleDelimiters, parserConf.tripleDelimiters,
-                     parserConf.operators || /^([-+*/%\/&|^]=?|[<>=]+|\/\/=?|\*\*=?|!=|[~!@])/]
+                     parserConf.operators || /^([-+*/%\/&|^]=?|[<>=]+|\/\/=?|\*\*=?|!=|[~!@]|\.\.\.)/]
     for (var i = 0; i < operators.length; i++) if (!operators[i]) operators.splice(i--, 1)
 
     var hangingIndent = parserConf.hangingIndent || conf.indentUnit;
@@ -18582,7 +18657,7 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
       if (stream.match(stringPrefixes)) {
         var isFmtString = stream.current().toLowerCase().indexOf('f') !== -1;
         if (!isFmtString) {
-          state.tokenize = tokenStringFactory(stream.current());
+          state.tokenize = tokenStringFactory(stream.current(), state.tokenize);
           return state.tokenize(stream, state);
         } else {
           state.tokenize = formatStringFactory(stream.current(), state.tokenize);
@@ -18625,23 +18700,18 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
       var singleline = delimiter.length == 1;
       var OUTCLASS = "string";
 
-      function tokenFString(stream, state) {
-        // inside f-str Expression
-        if (stream.match(delimiter)) {
-          // expression ends pre-maturally, but very common in editing
-          // Could show error to remind users to close brace here
-          state.tokenize = tokenString
-          return OUTCLASS;
-        } else if (stream.match('{')) {
-          // starting brace, if not eaten below
-          return "punctuation";
-        } else if (stream.match('}')) {
-          // return to regular inside string state
-          state.tokenize = tokenString
-          return "punctuation";
-        } else {
-          // use tokenBaseInner to parse the expression
-          return tokenBaseInner(stream, state);
+      function tokenNestedExpr(depth) {
+        return function(stream, state) {
+          var inner = tokenBaseInner(stream, state)
+          if (inner == "punctuation") {
+            if (stream.current() == "{") {
+              state.tokenize = tokenNestedExpr(depth + 1)
+            } else if (stream.current() == "}") {
+              if (depth > 1) state.tokenize = tokenNestedExpr(depth - 1)
+              else state.tokenize = tokenString
+            }
+          }
+          return inner
         }
       }
 
@@ -18660,14 +18730,9 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
             return OUTCLASS;
           } else if (stream.match('{', false)) {
             // switch to nested mode
-            state.tokenize = tokenFString
-            if (stream.current()) {
-              return OUTCLASS;
-            } else {
-              // need to return something, so eat the starting {
-              stream.next();
-              return "punctuation";
-            }
+            state.tokenize = tokenNestedExpr(0)
+            if (stream.current()) return OUTCLASS;
+            else return state.tokenize(stream, state)
           } else if (stream.match('}}')) {
             return OUTCLASS;
           } else if (stream.match('}')) {
@@ -18689,7 +18754,7 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
       return tokenString;
     }
 
-    function tokenStringFactory(delimiter) {
+    function tokenStringFactory(delimiter, tokenOuter) {
       while ("rubf".indexOf(delimiter.charAt(0).toLowerCase()) >= 0)
         delimiter = delimiter.substr(1);
 
@@ -18704,7 +18769,7 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
             if (singleline && stream.eol())
               return OUTCLASS;
           } else if (stream.match(delimiter)) {
-            state.tokenize = tokenBase;
+            state.tokenize = tokenOuter;
             return OUTCLASS;
           } else {
             stream.eat(/['"]/);
@@ -18714,7 +18779,7 @@ CodeMirror.defineMIME("text/x-puppet", "puppet");
           if (parserConf.singleLineStringErrors)
             return ERRORCLASS;
           else
-            state.tokenize = tokenBase;
+            state.tokenize = tokenOuter;
         }
         return OUTCLASS;
       }
@@ -19870,7 +19935,8 @@ CodeMirror.defineMode("ruby", function(config) {
   var indentWords = wordObj(["def", "class", "case", "for", "while", "until", "module", "then",
                              "catch", "loop", "proc", "begin"]);
   var dedentWords = wordObj(["end", "until"]);
-  var matching = {"[": "]", "{": "}", "(": ")"};
+  var opening = {"[": "]", "{": "}", "(": ")"};
+  var closing = {"]": "[", "}": "{", ")": "("};
   var curPunc;
 
   function chain(newtok, stream, state) {
@@ -19900,13 +19966,13 @@ CodeMirror.defineMode("ruby", function(config) {
       else if (stream.eat(/[wxq]/)) { style = "string"; embed = false; }
       var delim = stream.eat(/[^\w\s=]/);
       if (!delim) return "operator";
-      if (matching.propertyIsEnumerable(delim)) delim = matching[delim];
+      if (opening.propertyIsEnumerable(delim)) delim = opening[delim];
       return chain(readQuoted(delim, style, embed, true), stream, state);
     } else if (ch == "#") {
       stream.skipToEnd();
       return "comment";
-    } else if (ch == "<" && (m = stream.match(/^<-?[\`\"\']?([a-zA-Z_?]\w*)[\`\"\']?(?:;|$)/))) {
-      return chain(readHereDoc(m[1]), stream, state);
+    } else if (ch == "<" && (m = stream.match(/^<([-~])[\`\"\']?([a-zA-Z_?]\w*)[\`\"\']?(?:;|$)/))) {
+      return chain(readHereDoc(m[2], m[1]), stream, state);
     } else if (ch == "0") {
       if (stream.eat("x")) stream.eatWhile(/[\da-fA-F]/);
       else if (stream.eat("b")) stream.eatWhile(/[01]/);
@@ -20058,8 +20124,9 @@ CodeMirror.defineMode("ruby", function(config) {
       return style;
     };
   }
-  function readHereDoc(phrase) {
+  function readHereDoc(phrase, mayIndent) {
     return function(stream, state) {
+      if (mayIndent) stream.eatSpace()
       if (stream.match(phrase)) state.tokenize.pop();
       else stream.skipToEnd();
       return "string";
@@ -20118,12 +20185,12 @@ CodeMirror.defineMode("ruby", function(config) {
     },
 
     indent: function(state, textAfter) {
-      if (state.tokenize[state.tokenize.length-1] != tokenBase) return 0;
+      if (state.tokenize[state.tokenize.length-1] != tokenBase) return CodeMirror.Pass;
       var firstChar = textAfter && textAfter.charAt(0);
       var ct = state.context;
-      var closing = ct.type == matching[firstChar] ||
+      var closed = ct.type == closing[firstChar] ||
         ct.type == "keyword" && /^(?:end|until|else|elsif|when|rescue)\b/.test(textAfter);
-      return ct.indented + (closing ? 0 : config.indentUnit) +
+      return ct.indented + (closed ? 0 : config.indentUnit) +
         (state.continuedLine ? config.indentUnit : 0);
     },
 
@@ -22530,9 +22597,9 @@ CodeMirror.defineMIME('text/x-stsrc', {name: 'smalltalk'});
         state.last = last;
         return style;
       },
-      indent: function(state, text) {
+      indent: function(state, text, line) {
         if (state.tokenize == tokenTop && baseMode.indent)
-          return baseMode.indent(state.base, text);
+          return baseMode.indent(state.base, text, line);
         else
           return CodeMirror.Pass;
       },
@@ -22660,9 +22727,45 @@ CodeMirror.defineMIME("text/x-solr", "solr");
 })(function(CodeMirror) {
   "use strict";
 
-  var indentingTags = ["template", "literal", "msg", "fallbackmsg", "let", "if", "elseif",
-                       "else", "switch", "case", "default", "foreach", "ifempty", "for",
-                       "call", "param", "deltemplate", "delcall", "log"];
+  var paramData = { noEndTag: true, soyState: "param-def" };
+  var tags = {
+    "alias": { noEndTag: true },
+    "delpackage": { noEndTag: true },
+    "namespace": { noEndTag: true, soyState: "namespace-def" },
+    "@param": paramData,
+    "@param?": paramData,
+    "@inject": paramData,
+    "@inject?": paramData,
+    "@state": paramData,
+    "@state?": paramData,
+    "template": { soyState: "templ-def", variableScope: true},
+    "literal": { },
+    "msg": {},
+    "fallbackmsg": { noEndTag: true, reduceIndent: true},
+    "select": {},
+    "plural": {},
+    "let": { soyState: "var-def" },
+    "if": {},
+    "elseif": { noEndTag: true, reduceIndent: true},
+    "else": { noEndTag: true, reduceIndent: true},
+    "switch": {},
+    "case": { noEndTag: true, reduceIndent: true},
+    "default": { noEndTag: true, reduceIndent: true},
+    "foreach": { variableScope: true, soyState: "var-def" },
+    "ifempty": { noEndTag: true, reduceIndent: true},
+    "for": { variableScope: true, soyState: "var-def" },
+    "call": { soyState: "templ-ref" },
+    "param": { soyState: "param-ref"},
+    "print": { noEndTag: true },
+    "deltemplate": { soyState: "templ-def", variableScope: true},
+    "delcall": { soyState: "templ-ref" },
+    "log": {},
+    "element": { variableScope: true },
+  };
+
+  var indentingTags = Object.keys(tags).filter(function(tag) {
+    return !tags[tag].noEndTag || tags[tag].reduceIndent;
+  });
 
   CodeMirror.defineMode("soy", function(config) {
     var textMode = CodeMirror.getMode(config, "text/plain");
@@ -22717,30 +22820,38 @@ CodeMirror.defineMIME("text/x-solr", "solr");
       };
     }
 
+    function popcontext(state) {
+      if (!state.context) return;
+      if (state.context.scope) {
+        state.variables = state.context.scope;
+      }
+      state.context = state.context.previousContext;
+    }
+
     // Reference a variable `name` in `list`.
     // Let `loose` be truthy to ignore missing identifiers.
     function ref(list, name, loose) {
       return contains(list, name) ? "variable-2" : (loose ? "variable" : "variable-2 error");
     }
 
-    function popscope(state) {
-      if (state.scopes) {
-        state.variables = state.scopes.element;
-        state.scopes = state.scopes.next;
-      }
+    // Data for an open soy tag.
+    function Context(previousContext, tag, scope) {
+      this.previousContext = previousContext;
+      this.tag = tag;
+      this.kind = null;
+      this.scope = scope;
     }
 
     return {
       startState: function() {
         return {
-          kind: [],
-          kindTag: [],
           soyState: [],
           templates: null,
           variables: prepend(null, 'ij'),
           scopes: null,
           indent: 0,
           quoteKind: null,
+          context: null,
           localStates: [{
             mode: modes.html,
             state: CodeMirror.startState(modes.html)
@@ -22751,12 +22862,10 @@ CodeMirror.defineMIME("text/x-solr", "solr");
       copyState: function(state) {
         return {
           tag: state.tag, // Last seen Soy tag.
-          kind: state.kind.concat([]), // Values of kind="" attributes.
-          kindTag: state.kindTag.concat([]), // Opened tags with kind="" attributes.
           soyState: state.soyState.concat([]),
           templates: state.templates,
           variables: state.variables,
-          scopes: state.scopes,
+          context: state.context,
           indent: state.indent, // Indentation of the following line.
           quoteKind: state.quoteKind,
           localStates: state.localStates.map(function(localState) {
@@ -22778,7 +22887,7 @@ CodeMirror.defineMIME("text/x-solr", "solr");
             } else {
               stream.skipToEnd();
             }
-            if (!state.scopes) {
+            if (!state.context || !state.context.scope) {
               var paramRe = /@param\??\s+(\S+)/g;
               var current = stream.current();
               for (var match; (match = paramRe.exec(current)); ) {
@@ -22811,7 +22920,6 @@ CodeMirror.defineMIME("text/x-solr", "solr");
           case "templ-def":
             if (match = stream.match(/^\.?([\w]+(?!\.[\w]+)*)/)) {
               state.templates = prepend(state.templates, match[1]);
-              state.scopes = prepend(state.scopes, state.variables);
               state.soyState.pop();
               return "def";
             }
@@ -22819,13 +22927,21 @@ CodeMirror.defineMIME("text/x-solr", "solr");
             return null;
 
           case "templ-ref":
-            if (match = stream.match(/^\.?([\w]+)/)) {
+            if (match = stream.match(/(\.?[a-zA-Z_][a-zA-Z_0-9]+)+/)) {
               state.soyState.pop();
-              // If the first character is '.', try to match against a local template name.
+              // If the first character is '.', it can only be a local template.
               if (match[0][0] == '.') {
-                return ref(state.templates, match[1], true);
+                return "variable-2"
               }
               // Otherwise
+              return "variable";
+            }
+            stream.next();
+            return null;
+
+          case "namespace-def":
+            if (match = stream.match(/^\.?([\w\.]+)/)) {
+              state.soyState.pop();
               return "variable";
             }
             stream.next();
@@ -22841,13 +22957,21 @@ CodeMirror.defineMIME("text/x-solr", "solr");
             stream.next();
             return null;
 
+          case "param-ref":
+            if (match = stream.match(/^\w+/)) {
+              state.soyState.pop();
+              return "property";
+            }
+            stream.next();
+            return null;
+
           case "param-type":
             if (stream.peek() == "}") {
               state.soyState.pop();
               return null;
             }
-            if (stream.eatWhile(/^[\w]+/)) {
-              return "variable-3";
+            if (stream.eatWhile(/^([\w]+|[?])/)) {
+              return "type";
             }
             stream.next();
             return null;
@@ -22862,29 +22986,31 @@ CodeMirror.defineMIME("text/x-solr", "solr");
             return null;
 
           case "tag":
+            var endTag = state.tag[0] == "/";
+            var tagName = endTag ? state.tag.substring(1) : state.tag;
+            var tag = tags[tagName];
             if (stream.match(/^\/?}/)) {
+              var selfClosed = stream.current() == "/}";
+              if (selfClosed && !endTag) {
+                popcontext(state);
+              }
               if (state.tag == "/template" || state.tag == "/deltemplate") {
-                popscope(state);
                 state.variables = prepend(null, 'ij');
                 state.indent = 0;
               } else {
-                if (state.tag == "/for" || state.tag == "/foreach") {
-                  popscope(state);
-                }
                 state.indent -= config.indentUnit *
-                    (stream.current() == "/}" || indentingTags.indexOf(state.tag) == -1 ? 2 : 1);
+                    (selfClosed || indentingTags.indexOf(state.tag) == -1 ? 2 : 1);
               }
               state.soyState.pop();
               return "keyword";
             } else if (stream.match(/^([\w?]+)(?==)/)) {
-              if (stream.current() == "kind" && (match = stream.match(/^="([^"]+)/, false))) {
+              if (state.context && state.context.tag == tagName && stream.current() == "kind" && (match = stream.match(/^="([^"]+)/, false))) {
                 var kind = match[1];
-                state.kind.push(kind);
-                state.kindTag.push(state.tag);
+                state.context.kind = kind;
                 var mode = modes[kind] || modes.html;
                 var localState = last(state.localStates);
                 if (localState.mode.indent) {
-                  state.indent += localState.mode.indent(localState.state, "");
+                  state.indent += localState.mode.indent(localState.state, "", "");
                 }
                 state.localStates.push({
                   mode: mode,
@@ -22892,10 +23018,21 @@ CodeMirror.defineMIME("text/x-solr", "solr");
                 });
               }
               return "attribute";
+            } else if (match = stream.match(/([\w]+)(?=\()/)) {
+              return "variable callee";
             } else if (match = stream.match(/^["']/)) {
               state.soyState.push("string");
               state.quoteKind = match;
               return "string";
+            }
+            if (stream.match(/(null|true|false)(?!\w)/) ||
+              stream.match(/0x([0-9a-fA-F]{2,})/) ||
+              stream.match(/-?([0-9]*[.])?[0-9]+(e[0-9]*)?/)) {
+              return "atom";
+            }
+            if (stream.match(/(\||[+\-*\/%]|[=!]=|\?:|[<>]=?)/)) {
+              // Tokenize filter, binary, null propagator, and equality operators.
+              return "operator";
             }
             if (match = stream.match(/^\$([\w]+)/)) {
               return ref(state.variables, match[1]);
@@ -22918,41 +23055,49 @@ CodeMirror.defineMIME("text/x-solr", "solr");
         if (stream.match(/^\{literal}/)) {
           state.indent += config.indentUnit;
           state.soyState.push("literal");
+          state.context = new Context(state.context, "literal", state.variables);
           return "keyword";
 
         // A tag-keyword must be followed by whitespace, comment or a closing tag.
         } else if (match = stream.match(/^\{([/@\\]?\w+\??)(?=$|[\s}]|\/[/*])/)) {
-          if (match[1] != "/switch")
-            state.indent += (/^(\/|(else|elseif|ifempty|case|fallbackmsg|default)$)/.test(match[1]) && state.tag != "switch" ? 1 : 2) * config.indentUnit;
+          var prevTag = state.tag;
           state.tag = match[1];
-          if (state.tag == "/" + last(state.kindTag)) {
-            // We found the tag that opened the current kind="".
-            state.kind.pop();
-            state.kindTag.pop();
-            state.localStates.pop();
-            var localState = last(state.localStates);
-            if (localState.mode.indent) {
-              state.indent -= localState.mode.indent(localState.state, "");
-            }
-          }
+          var endTag = state.tag[0] == "/";
+          var indentingTag = !!tags[state.tag];
+          var tagName = endTag ? state.tag.substring(1) : state.tag;
+          var tag = tags[tagName];
+          if (state.tag != "/switch")
+            state.indent += ((endTag || tag && tag.reduceIndent) && prevTag != "switch" ? 1 : 2) * config.indentUnit;
+
           state.soyState.push("tag");
-          if (state.tag == "template" || state.tag == "deltemplate") {
-            state.soyState.push("templ-def");
-          } else if (state.tag == "call" || state.tag == "delcall") {
-            state.soyState.push("templ-ref");
-          } else if (state.tag == "let") {
-            state.soyState.push("var-def");
-          } else if (state.tag == "for" || state.tag == "foreach") {
-            state.scopes = prepend(state.scopes, state.variables);
-            state.soyState.push("var-def");
-          } else if (state.tag == "namespace") {
-            if (!state.scopes) {
-              state.variables = prepend(null, 'ij');
+          var tagError = false;
+          if (tag) {
+            if (!endTag) {
+              if (tag.soyState) state.soyState.push(tag.soyState);
             }
-          } else if (state.tag.match(/^@(?:param\??|inject|prop)/)) {
-            state.soyState.push("param-def");
+            // If a new tag, open a new context.
+            if (!tag.noEndTag && (indentingTag || !endTag)) {
+              state.context = new Context(state.context, state.tag, tag.variableScope ? state.variables : null);
+            // Otherwise close the current context.
+            } else if (endTag) {
+              if (!state.context || state.context.tag != tagName) {
+                tagError = true;
+              } else if (state.context) {
+                if (state.context.kind) {
+                  state.localStates.pop();
+                  var localState = last(state.localStates);
+                  if (localState.mode.indent) {
+                    state.indent -= localState.mode.indent(localState.state, "", "");
+                  }
+                }
+                popcontext(state);
+              }
+            }
+          } else if (endTag) {
+            // Assume all tags with a closing tag are defined in the config.
+            tagError = true;
           }
-          return "keyword";
+          return (tagError ? "error " : "") + "keyword";
 
         // Not a tag-keyword; it's an implicit print tag.
         } else if (stream.eat('{')) {
@@ -22965,7 +23110,7 @@ CodeMirror.defineMIME("text/x-solr", "solr");
         return tokenUntil(stream, state, /\{|\s+\/\/|\/\*/);
       },
 
-      indent: function(state, textAfter) {
+      indent: function(state, textAfter, line) {
         var indent = state.indent, top = last(state.soyState);
         if (top == "comment") return CodeMirror.Pass;
 
@@ -22979,7 +23124,7 @@ CodeMirror.defineMIME("text/x-solr", "solr");
         }
         var localState = last(state.localStates);
         if (indent && localState.mode.indent) {
-          indent += localState.mode.indent(localState.state, textAfter);
+          indent += localState.mode.indent(localState.state, textAfter, line);
         }
         return indent;
       },
@@ -23001,8 +23146,8 @@ CodeMirror.defineMIME("text/x-solr", "solr");
 
   CodeMirror.registerHelper("wordChars", "soy", /[\w$]/);
 
-  CodeMirror.registerHelper("hintWords", "soy", indentingTags.concat(
-      ["delpackage", "namespace", "alias", "print", "css", "debugger"]));
+  CodeMirror.registerHelper("hintWords", "soy", Object.keys(tags).concat(
+      ["css", "debugger"]));
 
   CodeMirror.defineMIME("text/x-soy", "soy");
 });
@@ -23049,7 +23194,7 @@ CodeMirror.defineMode("sparql", function(config) {
       if(ch == "?" && stream.match(/\s/, false)){
         return "operator";
       }
-      stream.match(/^[\w\d]*/);
+      stream.match(/^[A-Za-z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u02FF\u0370-\u037D\u037F-\u1FFF\u200C-\u200D\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD][A-Za-z0-9_\u00B7\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u037D\u037F-\u1FFF\u200C-\u200D\u203F-\u2040\u2070-\u218F\u2C00-\u2FEF\u3001-\uD7FF\uF900-\uFDCF\uFDF0-\uFFFD]*/);
       return "variable-2";
     }
     else if (ch == "<" && !stream.match(/^[\s\u00a0=]/, false)) {
@@ -23312,13 +23457,11 @@ CodeMirror.defineMIME("application/sparql-query", "sparql");
 "use strict";
 
 CodeMirror.defineMode("sql", function(config, parserConfig) {
-  "use strict";
-
   var client         = parserConfig.client || {},
       atoms          = parserConfig.atoms || {"false": true, "true": true, "null": true},
-      builtin        = parserConfig.builtin || {},
-      keywords       = parserConfig.keywords || {},
-      operatorChars  = parserConfig.operatorChars || /^[*+\-%<>!=&|~^]/,
+      builtin        = parserConfig.builtin || set(defaultBuiltin),
+      keywords       = parserConfig.keywords || set(sqlKeywords),
+      operatorChars  = parserConfig.operatorChars || /^[*+\-%<>!=&|~^\/]/,
       support        = parserConfig.support || {},
       hooks          = parserConfig.hooks || {},
       dateSQL        = parserConfig.dateSQL || {"date" : true, "time" : true, "timestamp" : true},
@@ -23505,9 +23648,6 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
   };
 });
 
-(function() {
-  "use strict";
-
   // `identifier`
   function hookIdentifier(stream) {
     // MySQL/MariaDB identifiers
@@ -23582,13 +23722,14 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
     return obj;
   }
 
+  var defaultBuiltin = "bool boolean bit blob enum long longblob longtext medium mediumblob mediumint mediumtext time timestamp tinyblob tinyint tinytext text bigint int int1 int2 int3 int4 int8 integer float float4 float8 double char varbinary varchar varcharacter precision real date datetime year unsigned signed decimal numeric"
+
   // A generic SQL Mode. It's not a standard, it just try to support what is generally supported
   CodeMirror.defineMIME("text/x-sql", {
     name: "sql",
     keywords: set(sqlKeywords + "begin"),
-    builtin: set("bool boolean bit blob enum long longblob longtext medium mediumblob mediumint mediumtext time timestamp tinyblob tinyint tinytext text bigint int int1 int2 int3 int4 int8 integer float float4 float8 double char varbinary varchar varcharacter precision real date datetime year unsigned signed decimal numeric"),
+    builtin: set(defaultBuiltin),
     atoms: set("false true null unknown"),
-    operatorChars: /^[*+\-%<>!=]/,
     dateSQL: set("date time timestamp"),
     support: set("ODBCdotTable doubleQuote binaryNumber hexNumber")
   });
@@ -23691,7 +23832,7 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
     client:     set("appinfo arraysize autocommit autoprint autorecovery autotrace blockterminator break btitle cmdsep colsep compatibility compute concat copycommit copytypecheck define describe echo editfile embedded escape exec execute feedback flagger flush heading headsep instance linesize lno loboffset logsource long longchunksize markup native newpage numformat numwidth pagesize pause pno recsep recsepchar release repfooter repheader serveroutput shiftinout show showmode size spool sqlblanklines sqlcase sqlcode sqlcontinue sqlnumber sqlpluscompatibility sqlprefix sqlprompt sqlterminator suffix tab term termout time timing trimout trimspool ttitle underline verify version wrap"),
     keywords:   set("abort accept access add all alter and any array arraylen as asc assert assign at attributes audit authorization avg base_table begin between binary_integer body boolean by case cast char char_base check close cluster clusters colauth column comment commit compress connect connected constant constraint crash create current currval cursor data_base database date dba deallocate debugoff debugon decimal declare default definition delay delete desc digits dispose distinct do drop else elseif elsif enable end entry escape exception exception_init exchange exclusive exists exit external fast fetch file for force form from function generic goto grant group having identified if immediate in increment index indexes indicator initial initrans insert interface intersect into is key level library like limited local lock log logging long loop master maxextents maxtrans member minextents minus mislabel mode modify multiset new next no noaudit nocompress nologging noparallel not nowait number_base object of off offline on online only open option or order out package parallel partition pctfree pctincrease pctused pls_integer positive positiven pragma primary prior private privileges procedure public raise range raw read rebuild record ref references refresh release rename replace resource restrict return returning returns reverse revoke rollback row rowid rowlabel rownum rows run savepoint schema segment select separate session set share snapshot some space split sql start statement storage subtype successful synonym tabauth table tables tablespace task terminate then to trigger truncate type union unique unlimited unrecoverable unusable update use using validate value values variable view views when whenever where while with work"),
     builtin:    set("abs acos add_months ascii asin atan atan2 average bfile bfilename bigserial bit blob ceil character chartorowid chr clob concat convert cos cosh count dec decode deref dual dump dup_val_on_index empty error exp false float floor found glb greatest hextoraw initcap instr instrb int integer isopen last_day least length lengthb ln lower lpad ltrim lub make_ref max min mlslabel mod months_between natural naturaln nchar nclob new_time next_day nextval nls_charset_decl_len nls_charset_id nls_charset_name nls_initcap nls_lower nls_sort nls_upper nlssort no_data_found notfound null number numeric nvarchar2 nvl others power rawtohex real reftohex round rowcount rowidtochar rowtype rpad rtrim serial sign signtype sin sinh smallint soundex sqlcode sqlerrm sqrt stddev string substr substrb sum sysdate tan tanh to_char text to_date to_label to_multi_byte to_number to_single_byte translate true trunc uid unlogged upper user userenv varchar varchar2 variance varying vsize xml"),
-    operatorChars: /^[*+\-%<>!=~]/,
+    operatorChars: /^[*\/+\-%<>!=~]/,
     dateSQL:    set("date time timestamp"),
     support:    set("doubleQuote nCharCast zerolessFloat binaryNumber hexNumber")
   });
@@ -23710,12 +23851,13 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
   CodeMirror.defineMIME("text/x-pgsql", {
     name: "sql",
     client: set("source"),
-    // https://www.postgresql.org/docs/10/static/sql-keywords-appendix.html
-    keywords: set(sqlKeywords + "a abort abs absent absolute access according action ada add admin after aggregate all allocate also always analyse analyze any are array array_agg array_max_cardinality asensitive assertion assignment asymmetric at atomic attribute attributes authorization avg backward base64 before begin begin_frame begin_partition bernoulli binary bit_length blob blocked bom both breadth c cache call called cardinality cascade cascaded case cast catalog catalog_name ceil ceiling chain characteristics characters character_length character_set_catalog character_set_name character_set_schema char_length check checkpoint class class_origin clob close cluster coalesce cobol collate collation collation_catalog collation_name collation_schema collect column columns column_name command_function command_function_code comment comments commit committed concurrently condition condition_number configuration conflict connect connection connection_name constraint constraints constraint_catalog constraint_name constraint_schema constructor contains content continue control conversion convert copy corr corresponding cost covar_pop covar_samp cross csv cube cume_dist current current_catalog current_date current_default_transform_group current_path current_role current_row current_schema current_time current_timestamp current_transform_group_for_type current_user cursor cursor_name cycle data database datalink datetime_interval_code datetime_interval_precision day db deallocate dec declare default defaults deferrable deferred defined definer degree delimiter delimiters dense_rank depth deref derived describe descriptor deterministic diagnostics dictionary disable discard disconnect dispatch dlnewcopy dlpreviouscopy dlurlcomplete dlurlcompleteonly dlurlcompletewrite dlurlpath dlurlpathonly dlurlpathwrite dlurlscheme dlurlserver dlvalue do document domain dynamic dynamic_function dynamic_function_code each element else empty enable encoding encrypted end end-exec end_frame end_partition enforced enum equals escape event every except exception exclude excluding exclusive exec execute exists exp explain expression extension external extract false family fetch file filter final first first_value flag float floor following for force foreign fortran forward found frame_row free freeze fs full function functions fusion g general generated get global go goto grant granted greatest grouping groups handler header hex hierarchy hold hour id identity if ignore ilike immediate immediately immutable implementation implicit import including increment indent index indexes indicator inherit inherits initially inline inner inout input insensitive instance instantiable instead integrity intersect intersection invoker isnull isolation k key key_member key_type label lag language large last last_value lateral lc_collate lc_ctype lead leading leakproof least left length level library like_regex link listen ln load local localtime localtimestamp location locator lock locked logged lower m map mapping match matched materialized max maxvalue max_cardinality member merge message_length message_octet_length message_text method min minute minvalue mod mode modifies module month more move multiset mumps name names namespace national natural nchar nclob nesting new next nfc nfd nfkc nfkd nil no none normalize normalized nothing notify notnull nowait nth_value ntile null nullable nullif nulls number object occurrences_regex octets octet_length of off offset oids old only open operator option options ordering ordinality others out outer output over overlaps overlay overriding owned owner p pad parallel parameter parameter_mode parameter_name parameter_ordinal_position parameter_specific_catalog parameter_specific_name parameter_specific_schema parser partial partition pascal passing passthrough password percent percentile_cont percentile_disc percent_rank period permission placing plans pli policy portion position position_regex power precedes preceding prepare prepared preserve primary prior privileges procedural procedure program public quote range rank read reads reassign recheck recovery recursive ref references referencing refresh regr_avgx regr_avgy regr_count regr_intercept regr_r2 regr_slope regr_sxx regr_sxy regr_syy reindex relative release rename repeatable replace replica requiring reset respect restart restore restrict restricted result return returned_cardinality returned_length returned_octet_length returned_sqlstate returning returns revoke right role rollback rollup routine routine_catalog routine_name routine_schema row rows row_count row_number rule savepoint scale schema schema_name scope scope_catalog scope_name scope_schema scroll search second section security selective self sensitive sequence sequences serializable server server_name session session_user setof sets share show similar simple size skip snapshot some source space specific specifictype specific_name sql sqlcode sqlerror sqlexception sqlstate sqlwarning sqrt stable standalone start state statement static statistics stddev_pop stddev_samp stdin stdout storage strict strip structure style subclass_origin submultiset substring substring_regex succeeds sum symmetric sysid system system_time system_user t tables tablesample tablespace table_name temp template temporary then ties timezone_hour timezone_minute to token top_level_count trailing transaction transactions_committed transactions_rolled_back transaction_active transform transforms translate translate_regex translation treat trigger trigger_catalog trigger_name trigger_schema trim trim_array true truncate trusted type types uescape unbounded uncommitted under unencrypted unique unknown unlink unlisten unlogged unnamed unnest until untyped upper uri usage user user_defined_type_catalog user_defined_type_code user_defined_type_name user_defined_type_schema using vacuum valid validate validator value value_of varbinary variadic var_pop var_samp verbose version versioning view views volatile when whenever whitespace width_bucket window within work wrapper write xmlagg xmlattributes xmlbinary xmlcast xmlcomment xmlconcat xmldeclaration xmldocument xmlelement xmlexists xmlforest xmliterate xmlnamespaces xmlparse xmlpi xmlquery xmlroot xmlschema xmlserialize xmltable xmltext xmlvalidate year yes loop repeat attach path depends detach zone"),
-    // https://www.postgresql.org/docs/10/static/datatype.html
+    // For PostgreSQL - https://www.postgresql.org/docs/11/sql-keywords-appendix.html
+    // For pl/pgsql lang - https://github.com/postgres/postgres/blob/REL_11_2/src/pl/plpgsql/src/pl_scanner.c
+    keywords: set(sqlKeywords + "a abort abs absent absolute access according action ada add admin after aggregate alias all allocate also alter always analyse analyze and any are array array_agg array_max_cardinality as asc asensitive assert assertion assignment asymmetric at atomic attach attribute attributes authorization avg backward base64 before begin begin_frame begin_partition bernoulli between bigint binary bit bit_length blob blocked bom boolean both breadth by c cache call called cardinality cascade cascaded case cast catalog catalog_name ceil ceiling chain char char_length character character_length character_set_catalog character_set_name character_set_schema characteristics characters check checkpoint class class_origin clob close cluster coalesce cobol collate collation collation_catalog collation_name collation_schema collect column column_name columns command_function command_function_code comment comments commit committed concurrently condition condition_number configuration conflict connect connection connection_name constant constraint constraint_catalog constraint_name constraint_schema constraints constructor contains content continue control conversion convert copy corr corresponding cost count covar_pop covar_samp create cross csv cube cume_dist current current_catalog current_date current_default_transform_group current_path current_role current_row current_schema current_time current_timestamp current_transform_group_for_type current_user cursor cursor_name cycle data database datalink datatype date datetime_interval_code datetime_interval_precision day db deallocate debug dec decimal declare default defaults deferrable deferred defined definer degree delete delimiter delimiters dense_rank depends depth deref derived desc describe descriptor detach detail deterministic diagnostics dictionary disable discard disconnect dispatch distinct dlnewcopy dlpreviouscopy dlurlcomplete dlurlcompleteonly dlurlcompletewrite dlurlpath dlurlpathonly dlurlpathwrite dlurlscheme dlurlserver dlvalue do document domain double drop dump dynamic dynamic_function dynamic_function_code each element else elseif elsif empty enable encoding encrypted end end_frame end_partition endexec enforced enum equals errcode error escape event every except exception exclude excluding exclusive exec execute exists exit exp explain expression extension external extract false family fetch file filter final first first_value flag float floor following for force foreach foreign fortran forward found frame_row free freeze from fs full function functions fusion g general generated get global go goto grant granted greatest group grouping groups handler having header hex hierarchy hint hold hour id identity if ignore ilike immediate immediately immutable implementation implicit import in include including increment indent index indexes indicator info inherit inherits initially inline inner inout input insensitive insert instance instantiable instead int integer integrity intersect intersection interval into invoker is isnull isolation join k key key_member key_type label lag language large last last_value lateral lead leading leakproof least left length level library like like_regex limit link listen ln load local localtime localtimestamp location locator lock locked log logged loop lower m map mapping match matched materialized max max_cardinality maxvalue member merge message message_length message_octet_length message_text method min minute minvalue mod mode modifies module month more move multiset mumps name names namespace national natural nchar nclob nesting new next nfc nfd nfkc nfkd nil no none normalize normalized not nothing notice notify notnull nowait nth_value ntile null nullable nullif nulls number numeric object occurrences_regex octet_length octets of off offset oids old on only open operator option options or order ordering ordinality others out outer output over overlaps overlay overriding owned owner p pad parallel parameter parameter_mode parameter_name parameter_ordinal_position parameter_specific_catalog parameter_specific_name parameter_specific_schema parser partial partition pascal passing passthrough password path percent percent_rank percentile_cont percentile_disc perform period permission pg_context pg_datatype_name pg_exception_context pg_exception_detail pg_exception_hint placing plans pli policy portion position position_regex power precedes preceding precision prepare prepared preserve primary print_strict_params prior privileges procedural procedure procedures program public publication query quote raise range rank read reads real reassign recheck recovery recursive ref references referencing refresh regr_avgx regr_avgy regr_count regr_intercept regr_r2 regr_slope regr_sxx regr_sxy regr_syy reindex relative release rename repeatable replace replica requiring reset respect restart restore restrict result result_oid return returned_cardinality returned_length returned_octet_length returned_sqlstate returning returns reverse revoke right role rollback rollup routine routine_catalog routine_name routine_schema routines row row_count row_number rows rowtype rule savepoint scale schema schema_name schemas scope scope_catalog scope_name scope_schema scroll search second section security select selective self sensitive sequence sequences serializable server server_name session session_user set setof sets share show similar simple size skip slice smallint snapshot some source space specific specific_name specifictype sql sqlcode sqlerror sqlexception sqlstate sqlwarning sqrt stable stacked standalone start state statement static statistics stddev_pop stddev_samp stdin stdout storage strict strip structure style subclass_origin submultiset subscription substring substring_regex succeeds sum symmetric sysid system system_time system_user t table table_name tables tablesample tablespace temp template temporary text then ties time timestamp timezone_hour timezone_minute to token top_level_count trailing transaction transaction_active transactions_committed transactions_rolled_back transform transforms translate translate_regex translation treat trigger trigger_catalog trigger_name trigger_schema trim trim_array true truncate trusted type types uescape unbounded uncommitted under unencrypted union unique unknown unlink unlisten unlogged unnamed unnest until untyped update upper uri usage use_column use_variable user user_defined_type_catalog user_defined_type_code user_defined_type_name user_defined_type_schema using vacuum valid validate validator value value_of values var_pop var_samp varbinary varchar variable_conflict variadic varying verbose version versioning view views volatile warning when whenever where while whitespace width_bucket window with within without work wrapper write xml xmlagg xmlattributes xmlbinary xmlcast xmlcomment xmlconcat xmldeclaration xmldocument xmlelement xmlexists xmlforest xmliterate xmlnamespaces xmlparse xmlpi xmlquery xmlroot xmlschema xmlserialize xmltable xmltext xmlvalidate year yes zone"),
+    // https://www.postgresql.org/docs/11/datatype.html
     builtin: set("bigint int8 bigserial serial8 bit varying varbit boolean bool box bytea character char varchar cidr circle date double precision float8 inet integer int int4 interval json jsonb line lseg macaddr macaddr8 money numeric decimal path pg_lsn point polygon real float4 smallint int2 smallserial serial2 serial serial4 text time without zone with timetz timestamp timestamptz tsquery tsvector txid_snapshot uuid xml"),
     atoms: set("false true null unknown"),
-    operatorChars: /^[*+\-%<>!=&|^\/#@?~]/,
+    operatorChars: /^[*\/+\-%<>!=&|^\/#@?~]/,
     dateSQL: set("date time timestamp"),
     support: set("ODBCdotTable decimallessFloat zerolessFloat binaryNumber hexNumber nCharCast charsetCast")
   });
@@ -23748,7 +23890,7 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
     keywords: set("add after all alter analyze and anti archive array as asc at between bucket buckets by cache cascade case cast change clear cluster clustered codegen collection column columns comment commit compact compactions compute concatenate cost create cross cube current current_date current_timestamp database databases datata dbproperties defined delete delimited deny desc describe dfs directories distinct distribute drop else end escaped except exchange exists explain export extended external false fields fileformat first following for format formatted from full function functions global grant group grouping having if ignore import in index indexes inner inpath inputformat insert intersect interval into is items join keys last lateral lazy left like limit lines list load local location lock locks logical macro map minus msck natural no not null nulls of on optimize option options or order out outer outputformat over overwrite partition partitioned partitions percent preceding principals purge range recordreader recordwriter recover reduce refresh regexp rename repair replace reset restrict revoke right rlike role roles rollback rollup row rows schema schemas select semi separated serde serdeproperties set sets show skewed sort sorted start statistics stored stratify struct table tables tablesample tblproperties temp temporary terminated then to touch transaction transactions transform true truncate unarchive unbounded uncache union unlock unset use using values view when where window with"),
     builtin: set("tinyint smallint int bigint boolean float double string binary timestamp decimal array map struct uniontype delimited serde sequencefile textfile rcfile inputformat outputformat"),
     atoms: set("false true null"),
-    operatorChars: /^[*+\-%<>!=~&|^]/,
+    operatorChars: /^[*\/+\-%<>!=~&|^]/,
     dateSQL: set("date time timestamp"),
     support: set("ODBCdotTable doubleQuote zerolessFloat")
   });
@@ -23765,8 +23907,6 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
     dateSQL: set("time"),
     support: set("decimallessFloat zerolessFloat binaryNumber hexNumber")
   });
-}());
-
 });
 
 /*
@@ -24907,9 +25047,9 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
       stream.match("..")
       return "punctuation"
     }
-    if (ch == '"' || ch == "'") {
-      stream.next()
-      var tokenize = tokenString(ch)
+    var stringMatch
+    if (stringMatch = stream.match(/("""|"|')/)) {
+      var tokenize = tokenString.bind(null, stringMatch[0])
       state.tokenize.push(tokenize)
       return tokenize(stream, state)
     }
@@ -24950,25 +25090,29 @@ CodeMirror.defineMode("sql", function(config, parserConfig) {
     }
   }
 
-  function tokenString(quote) {
-    return function(stream, state) {
-      var ch, escaped = false
-      while (ch = stream.next()) {
-        if (escaped) {
-          if (ch == "(") {
-            state.tokenize.push(tokenUntilClosingParen())
-            return "string"
-          }
-          escaped = false
-        } else if (ch == quote) {
-          break
-        } else {
-          escaped = ch == "\\"
+  function tokenString(openQuote, stream, state) {
+    var singleLine = openQuote.length == 1
+    var ch, escaped = false
+    while (ch = stream.peek()) {
+      if (escaped) {
+        stream.next()
+        if (ch == "(") {
+          state.tokenize.push(tokenUntilClosingParen())
+          return "string"
         }
+        escaped = false
+      } else if (stream.match(openQuote)) {
+        state.tokenize.pop()
+        return "string"
+      } else {
+        stream.next()
+        escaped = ch == "\\"
       }
-      state.tokenize.pop()
-      return "string"
     }
+    if (singleLine) {
+      state.tokenize.pop()
+    }
+    return "string"
   }
 
   function tokenComment(stream, state) {
@@ -27345,16 +27489,16 @@ CodeMirror.defineMode("vb", function(conf, parserConf) {
     var tripleDelimiters = new RegExp("^((//=)|(>>=)|(<<=)|(\\*\\*=))");
     var identifiers = new RegExp("^[_A-Za-z][_A-Za-z0-9]*");
 
-    var openingKeywords = ['class','module', 'sub','enum','select','while','if','function',  'get','set','property', 'try'];
-    var middleKeywords = ['else','elseif','case', 'catch'];
+    var openingKeywords = ['class','module', 'sub','enum','select','while','if','function', 'get','set','property', 'try', 'structure', 'synclock', 'using', 'with'];
+    var middleKeywords = ['else','elseif','case', 'catch', 'finally'];
     var endKeywords = ['next','loop'];
 
-    var operatorKeywords = ['and', 'or', 'not', 'xor', 'in'];
+    var operatorKeywords = ['and', "andalso", 'or', 'orelse', 'xor', 'in', 'not', 'is', 'isnot', 'like'];
     var wordOperators = wordRegexp(operatorKeywords);
-    var commonKeywords = ['as', 'dim', 'break',  'continue','optional', 'then',  'until',
-                          'goto', 'byval','byref','new','handles','property', 'return',
-                          'const','private', 'protected', 'friend', 'public', 'shared', 'static', 'true','false'];
-    var commontypes = ['integer','string','double','decimal','boolean','short','char', 'float','single'];
+
+    var commonKeywords = ["#const", "#else", "#elseif", "#end", "#if", "#region", "addhandler", "addressof", "alias", "as", "byref", "byval", "cbool", "cbyte", "cchar", "cdate", "cdbl", "cdec", "cint", "clng", "cobj", "compare", "const", "continue", "csbyte", "cshort", "csng", "cstr", "cuint", "culng", "cushort", "declare", "default", "delegate", "dim", "directcast", "each", "erase", "error", "event", "exit", "explicit", "false", "for", "friend", "gettype", "goto", "handles", "implements", "imports", "infer", "inherits", "interface", "isfalse", "istrue", "lib", "me", "mod", "mustinherit", "mustoverride", "my", "mybase", "myclass", "namespace", "narrowing", "new", "nothing", "notinheritable", "notoverridable", "of", "off", "on", "operator", "option", "optional", "out", "overloads", "overridable", "overrides", "paramarray", "partial", "private", "protected", "public", "raiseevent", "readonly", "redim", "removehandler", "resume", "return", "shadows", "shared", "static", "step", "stop", "strict", "then", "throw", "to", "true", "trycast", "typeof", "until", "until", "when", "widening", "withevents", "writeonly"];
+
+    var commontypes = ['object', 'boolean', 'char', 'string', 'byte', 'sbyte', 'short', 'ushort', 'int16', 'uint16', 'integer', 'uinteger', 'int32', 'uint32', 'long', 'ulong', 'int64', 'uint64', 'decimal', 'single', 'double', 'float', 'date', 'datetime', 'intptr', 'uintptr'];
 
     var keywords = wordRegexp(commonKeywords);
     var types = wordRegexp(commontypes);

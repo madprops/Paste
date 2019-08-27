@@ -104,7 +104,7 @@ Paste.create_editor = function()
 	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
 	{
 		lineNumbers: true,
-		theme: "dracula",
+		theme: "nord",
 		indentWithTabs: true,
 		scrollbarStyle: "simple",
 		tabSize: 4,
@@ -1023,6 +1023,7 @@ Paste.get_mode_history = function()
 			{mode_name: "JavaScript"}, 
 			{mode_name: "HTML"},
 			{mode_name: "CSS"},
+			{mode_name: "Rust"},
 			{mode_name: "Python"},
 			{mode_name: "Java"}
 		]

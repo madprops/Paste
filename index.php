@@ -77,10 +77,10 @@
 	<title><?php echo $title ?></title>
 	<link rel="icon" type="image/png" href="/favicon.png"/>
 	<link rel="stylesheet" href='/codemirror/lib/codemirror.css'>
-	<link rel="stylesheet" href='/codemirror/theme/dracula.css'>
+	<link rel="stylesheet" href='/codemirror/theme/nord.css'>
 	<link rel="stylesheet" href='/codemirror/addon/scroll/simplescrollbars.css'>
 	<link rel="stylesheet" href='/css/perfect-scrollbar.css'>
-	<link rel="stylesheet" href='/css/style.css?version=35'>
+	<link rel="stylesheet" href='/css/style.css?version=36'>
 	<script src='/codemirror/lib/codemirror.js'></script>
 	<script src='/codemirror/addon/mode/overlay.js'></script>
 	<script src='/codemirror/addon/mode/simple.js'></script>
@@ -90,7 +90,7 @@
 	<script src='/codemirror/mode/meta.js'></script>
 	<script src='/codemirror/addon/scroll/simplescrollbars.js'></script>
 	<script src='/js/perfect-scrollbar.min.js'></script>
-	<script src='/js/base.js?version=86'></script>
+	<script src='/js/base.js?version=88'></script>
 	<script>
 		window.onload = function()
 		{
