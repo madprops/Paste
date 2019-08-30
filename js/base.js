@@ -848,7 +848,7 @@ Paste.setup_render = function()
 
 Paste.reset_render_iframe = function()
 {
-	Paste.render_iframe.src = `about:blank?t=${Date.now()}_${Paste.get_random_string(4)}`
+	Paste.render_iframe.contentWindow.location.reload();
 }
 
 Paste.render = function()

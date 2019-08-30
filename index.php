@@ -86,7 +86,7 @@
 	<script src='/codemirror/addon/mode/loadmode.js'></script>
 	<script src='/codemirror/mode/mode_bundle_min.js'></script>
 	<script src='/codemirror/mode/meta.js'></script>
-	<script src='/js/base.js?version=90'></script>
+	<script src='/js/base.js?version=92'></script>
 	<script>
 		window.onload = function()
 		{
