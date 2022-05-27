@@ -212,7 +212,7 @@ Paste.show_footer_message = function (s, succ) {
 	Paste.footer.style.bottom = "0"
 
 	Paste.footer_timeout = setTimeout(function () {
-		Paste.footer.style.bottom = "-3rem"
+		Paste.footer.style.bottom = "-2.5rem"
 	}, 3000)
 }
 
