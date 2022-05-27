@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/madprops/Paste#readme",
   "dependencies": {
-    "google-closure-compiler": "^20181028.0.1"
+
   }
 }
