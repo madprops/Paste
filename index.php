@@ -8,45 +8,38 @@
 
 	$parts = parse_url($_SERVER['REQUEST_URI']);
 	parse_str($parts["query"], $query);
-	$url = $query["url"];
+	$code = $query["code"];
 
-	if(is_null_or_empty_string($url)) {
+	if (is_null_or_empty_string($code)) {
 		$code = "";
 		$content = "";
 		$title = "Paste";
-		$revision = 1;
 		$comment = "";
 	} else {
-		$url_split = explode("-", $url);
-		$code = $url_split[0] . "-" . $url_split[1];
-		$revision = $url_split[2];
-
 		// Create a new database, if the file doesn't exist and open it for reading/writing.
 		// The extension of the file is arbitrary.
-		$db = new SQLite3('pastes_v5.sqlite', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+		$db = new SQLite3("pastes_v6.sqlite", SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 		// Create a table.
 		$db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 			"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 			"content" VARCHAR,
 			"code" VARCHAR,
-			"revision" INTEGER,
 			"comment" VARCHAR,
 			"date" DATETIME,
 			"token" VARCHAR
 		)');
 
-		$statement = $db->prepare('SELECT * FROM "pastes" WHERE "code" = ? AND "revision" = ?');
+		$statement = $db->prepare('SELECT * FROM "pastes" WHERE "code" = ?');
 		$statement->bindValue(1, $code);
-		$statement->bindValue(2, $revision);
 		$result = $statement->execute();
 		$array = $result->fetchArray(SQLITE3_ASSOC);
 		$content = $array["content"];
 		$comment = $array["comment"];
 
-		if(is_null_or_empty_string($comment)) {
+		if (is_null_or_empty_string($comment)) {
 			$comment = "";
-			$title = "Paste - " . $url;
+			$title = "Paste - " . $code;
 		} else {
 			$title = "Paste - " . substr($comment, 0, 140);
 		}
@@ -75,7 +68,7 @@
 	<script src='js/base.js?version=92'></script>
 	<script>
 		window.onload = function() {
-			Paste.url = <?php echo json_encode($url); ?>;
+			Paste.code = <?php echo json_encode($code); ?>;
 			Paste.initial_content = <?php echo json_encode($content); ?>;
 			Paste.initial_comment = <?php echo json_encode($comment); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;

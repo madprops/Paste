@@ -40,8 +40,7 @@ function random_string($length = 10)  {
 	$charactersLength = strlen($characters);
 	$randomString = "";
 
-	for ($i = 0; $i < $length; $i++) 
-	{
+	for ($i = 0; $i < $length; $i++) {
 		$randomString .= $characters[rand(0, $charactersLength - 1)];
 	}
 
@@ -57,14 +56,13 @@ $max_comment_length = 200;
 
 // Create a new database, if the file doesn't exist and open it for reading/writing.
 // The extension of the file is arbitrary.
-$db = new SQLite3("pastes_v5.sqlite", SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+$db = new SQLite3("pastes_v6.sqlite", SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 
 // Create a table.
 $db->query('CREATE TABLE IF NOT EXISTS "pastes" (
 	"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 	"content" VARCHAR,
 	"code" VARCHAR,
-	"revision" INTEGER,
 	"comment" VARCHAR,
 	"date" DATETIME,
 	"modified" DATETIME,
@@ -75,7 +73,7 @@ $db->exec("BEGIN");
 
 $date = time();
 
-if(isset($_POST["content"])) {
+if (isset($_POST["content"])) {
 	$content = $_POST["content"];
 } else {
 	exit();
@@ -83,11 +81,11 @@ if(isset($_POST["content"])) {
 
 $content_length = strlen($content);
 
-if($content_length > $max_content_length) {
+if ($content_length > $max_content_length) {
 	exit();
 }
 
-if(isset($_POST["comment"])) {
+if (isset($_POST["comment"])) {
 	$comment = $_POST["comment"];
 } else {
 	$comment = "";
@@ -95,18 +93,18 @@ if(isset($_POST["comment"])) {
 
 $comment_length = strlen($comment);
 
-if($comment_length > $max_comment_length) {
+if ($comment_length > $max_comment_length) {
 	exit();
 }
 
-if($content_length === 0 && $comment_length === 0) {
+if ($content_length === 0 && $comment_length === 0) {
 	exit();
 }
 
-if(isset($_POST["token"])) {
+if (isset($_POST["token"])) {
 	$token = $_POST["token"];
 
-	if(is_null_or_empty_string($token)) {
+	if (is_null_or_empty_string($token)) {
 		$update = false;
 	} else {
 		$update = true;
@@ -115,51 +113,23 @@ if(isset($_POST["token"])) {
 	$update = false;
 }
 
-if($update) {	
-	$statement = $db->prepare('SELECT code, revision FROM "pastes" WHERE "token" = ?');
+if ($update) {	
+	$statement = $db->prepare('SELECT code FROM "pastes" WHERE "token" = ?');
 	$statement->bindValue(1, $token);
 	$result = $statement->execute();
 	$array = $result->fetchArray(SQLITE3_ASSOC);
 
-	if($array != false) {
+	if ($array != false) {
 		$code = $array["code"];
-		$revision = $array["revision"];
-		$url = $code . "-" . $revision;
 	} else {
 		exit();
 	}
 } else {
-	if(isset($_SERVER["HTTP_REFERER"])) {
-		$ourl = $_SERVER["HTTP_REFERER"];
-
-		if(is_null_or_empty_string($ourl))
-		{
-			$url = "";
-		} else {
-			$ourl = strtok($ourl, "?");
-			$exploded = explode("/", $ourl);
-			$url = array_pop($exploded);
-		}
-	} else {
-		$url = "";
-	}
-
-	if(is_null_or_empty_string($url)) {
-		$revision = 1;
-		$code = $date . "-" . random_word(6);
-		$url = $code . "-" . $revision;
-	} else {
-		$url_split = explode("-", $url);
-		$code = $url_split[0] . "-" . $url_split[1];
-		$num_revisions = $db->querySingle('SELECT COUNT(DISTINCT "revision") FROM "pastes" WHERE "code" = "' . $code . '" ');	
-		$revision = $num_revisions + 1;
-		$url = $code . "-" . $revision;
-	}
-
-	$token = generate_token($url);
+	$code = $date . "-" . random_word(6);
+	$token = generate_token($code);
 }
 
-if($update) {
+if ($update) {
 	$statement = $db->prepare('UPDATE "pastes" 
 		SET content=:acontent, comment=:acomment, modified=:amodified
 		WHERE token=:token');
@@ -172,12 +142,11 @@ if($update) {
 	$statement->execute();
 } else {
 	$statement = $db->prepare('INSERT INTO "pastes" 
-		("content", "code", "revision", "comment", "date", "modified", "token")
-		VALUES (:acontent, :acode, :arevision, :acomment, :adate, :amodified, :atoken)');
+		("content", "code", "comment", "date", "modified", "token")
+		VALUES (:acontent, :acode, :acomment, :adate, :amodified, :atoken)');
 
 	$statement->bindValue(":acontent", $content);
 	$statement->bindValue(":acode", $code);
-	$statement->bindValue(":arevision", $revision);
 	$statement->bindValue(":acomment", $comment);
 	$statement->bindValue(":adate", $date);
 	$statement->bindValue(":amodified", $date);
@@ -190,6 +159,6 @@ $db->exec("COMMIT");
 
 $db->close();
 
-$response = array("url" => $url, "token" => $token);
+$response = array("code" => $code, "token" => $token);
 
 echo json_encode($response);

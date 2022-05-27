@@ -100,24 +100,24 @@ Paste.save_paste = function (update = false) {
 	let token
 
 	if (update) {
-		token = Paste.get_token_by_url(Paste.url)
+		token = Paste.get_token_by_url(Paste.code)
 	} else {
 		token = ""
 	}
 
 	let onsuccess = function (response) {
-		let url = response["url"]
+		let code = response["code"]
 		let token = response["token"]
 
-		if (url && token) {
-			Paste.push_to_tokens(url, token)
+		if (code && token) {
+			Paste.push_to_tokens(code, token)
 		}
 
-		if (url) {
-			if (url === Paste.url) {
+		if (code) {
+			if (code === Paste.code) {
 				Paste.after_update()
 			} else {
-				Paste.go_to_location(`?url=${url}&saved=true`)
+				Paste.go_to_location(`?code=${code}&saved=true`)
 			}
 		}
 	}
@@ -256,7 +256,7 @@ Paste.go_to_location = function (url) {
 }
 
 Paste.new_paste = function () {
-	if (Paste.url) {
+	if (Paste.code) {
 		let url = window.location.href.split("?")[0]
 		Paste.go_to_location(url)
 	} else {
@@ -408,7 +408,7 @@ Paste.push_to_tokens = function (url, token, save = true) {
 }
 
 Paste.check_ownership = function () {
-	if (Paste.get_token_by_url(Paste.url)) {
+	if (Paste.get_token_by_url(Paste.code)) {
 		Paste.owner = true
 		Paste.toolbar_update.classList.remove("paste_disabled")
 	} else {
