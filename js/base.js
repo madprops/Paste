@@ -121,12 +121,15 @@ Paste.save_paste = function (update = false) {
 			}
 		}
 	}
+	
+	let passwd = prompt("Enter Password")
 
 	Paste.send_post("save.php",
 		{
 			content: content, 
 			comment: Paste.get_comment(), 
-			token: token
+			token: token,
+			passwd: passwd
 		}, onsuccess)
 }
 

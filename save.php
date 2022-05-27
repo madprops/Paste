@@ -73,6 +73,18 @@ $db->exec("BEGIN");
 
 $date = time();
 
+if (isset($_POST["passwd"])) {
+	$passwd = $_POST["passwd"];
+} else {
+	exit();
+}
+
+$passwd_file = file_get_contents("passwd.data");
+
+if ($passwd != $passwd_file) {
+	exit();
+}
+
 if (isset($_POST["content"])) {
 	$content = $_POST["content"];
 } else {
