@@ -82,7 +82,7 @@ if (isset($_POST["passwd"])) {
 $passwd_file = trim(file_get_contents("passwd.data"));
 
 if ($passwd != $passwd_file) {
-	exit();
+	exit(1);
 }
 
 if (isset($_POST["content"])) {

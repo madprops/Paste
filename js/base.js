@@ -1,6 +1,7 @@
 const Paste = {}
 
 Paste.ls_tokens = "tokens_v1"
+Paste.ls_passwd = "passwd_v1"
 Paste.max_content_length = 500000
 Paste.max_comment_length = 200
 Paste.is_loading = true
@@ -121,8 +122,13 @@ Paste.save_paste = function (update = false) {
 			}
 		}
 	}
-	
-	let passwd = prompt("Enter Password")
+
+	let passwd = Paste.get_local_storage(Paste.ls_passwd).passwd
+
+	if (!passwd) {
+		passwd = prompt("Enter Password")
+		Paste.save_local_storage(Paste.ls_passwd, {passwd: passwd})
+	}
 
 	Paste.send_post("save.php",
 		{
@@ -173,8 +179,12 @@ Paste.send_post = function (target, data, onsuccess) {
 			if (XHR.status == 200) {
 				if (XHR.response) {
 					onsuccess(XHR.response)
+					return
 				}
 			}
+
+			console.info("XHR Error")
+			Paste.save_local_storage(Paste.ls_passwd, {passwd: ""})
 		}
 	}
 
@@ -235,7 +245,7 @@ Paste.get_local_storage = function (ls_name) {
 		}
 
 		catch (err) {
-			localStorage.removeItem(ls_name)
+			console.error(err)
 			obj = null
 		}
 	} else {
@@ -245,11 +255,8 @@ Paste.get_local_storage = function (ls_name) {
 	return obj
 }
 
-Paste.save_local_storage = function (ls_name, obj) {
-	if (typeof obj !== "string") {
-		obj = JSON.stringify(obj)
-	}
-
+Paste.save_local_storage = function (ls_name, obj) {	
+	obj = JSON.stringify(obj)
 	localStorage.setItem(ls_name, obj)
 }
 
