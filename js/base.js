@@ -123,7 +123,12 @@ Paste.save_paste = function (update = false) {
 		}
 	}
 
-	let passwd = Paste.get_local_storage(Paste.ls_passwd).passwd
+	let passwd = ""
+	let passwdobj = Paste.get_local_storage(Paste.ls_passwd)
+
+	if (passwdobj) {
+		passwd = passwdobj.passwd
+	}
 
 	if (!passwd) {
 		passwd = prompt("Enter Password")
