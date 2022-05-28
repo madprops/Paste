@@ -24,7 +24,6 @@ Paste.init = function () {
 	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_tokens()
-	Paste.activate_key_detection()
 	Paste.remove_content_background()
 	Paste.setup_comment()
 	Paste.setup_window_load()
@@ -289,20 +288,6 @@ Paste.make_safe = function (s) {
 
 Paste.remove_non_alphanumeric = function (s) {
 	return s.replace(/[\W_]+/g, "");
-}
-
-Paste.activate_key_detection = function () {
-	document.addEventListener("keydown", function (e) {
-		if (Paste.is_loading) {
-			return false
-		}
-	})
-
-	document.addEventListener("keyup", function (e) {
-		if (Paste.is_loading) {
-			return false
-		}
-	})
 }
 
 Paste.paste_is_modified = function () {
