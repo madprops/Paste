@@ -84,13 +84,13 @@
 		</div>
 
 		<div id='paste_toolbar' class='paste_unselectable'>
-			<div id='paste_toolbar_save' class='paste_toolbar_button_container' onclick='Paste.save_paste()'>
+			<div id='paste_toolbar_save' class='paste_toolbar_button_container'>
 				<span class='paste_toolbar_button'>Save</span>
 			</div>			
-			<div id='paste_toolbar_update' class='paste_toolbar_button_container paste_border_left' onclick='Paste.update_paste()'>
+			<div id='paste_toolbar_update' class='paste_toolbar_button_container paste_border_left'>
 				<span class='paste_toolbar_button'>Update</span>
 			</div>
-			<div id='paste_toolbar_clear' class='paste_toolbar_button_container paste_border_left' onclick='Paste.new_paste()'>
+			<div id='paste_toolbar_new' class='paste_toolbar_button_container paste_border_left'>
 				<span class='paste_toolbar_button'>New</span>
 			</div>
 		</div>

@@ -12,31 +12,27 @@ Paste.default_comment = "Leave a comment here"
 
 Paste.init = function () {
 	Paste.main = document.getElementById("paste_main")
-	Paste.content_main = document.getElementById("paste_content_main")
 	Paste.textarea = document.getElementById("paste_textarea")
 	Paste.footer = document.getElementById("paste_footer")
 	Paste.comment_content = document.getElementById("paste_comment_content")
 	Paste.loading = document.getElementById("paste_loading")
-	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
 	Paste.toolbar_save = document.getElementById("paste_toolbar_save")
+	Paste.toolbar_update = document.getElementById("paste_toolbar_update")
+	Paste.toolbar_new = document.getElementById("paste_toolbar_new")
 
 	Paste.check_save()
 	Paste.create_editor()
 	Paste.remove_get_parameters_from_url()
 	Paste.get_tokens()
-	Paste.remove_content_background()
 	Paste.setup_comment()
 	Paste.setup_window_load()
 	Paste.check_ownership()
 	Paste.stop_loading_mode()
+	Paste.setup_click_events()
 
 	Paste.editor.setOption("mode", "clike")
 	Paste.editor.refresh()
 	Paste.editor.focus()
-}
-
-Paste.remove_content_background = function () {
-	Paste.content_main.style.backgroundColor = "transparent"
 }
 
 Paste.create_editor = function () {
@@ -52,10 +48,6 @@ Paste.create_editor = function () {
 
 	Paste.document = Paste.editor.getDoc()
 	Paste.set_content(Paste.initial_content)
-}
-
-Paste.clear_textarea = function () {
-	Paste.set_content("")
 }
 
 Paste.update_paste = function () {
@@ -235,12 +227,6 @@ Paste.after_update = function () {
 	Paste.show_save_success(true)
 }
 
-Paste.get_sample = function () {
-	let content = Paste.get_content()
-	let sample = content.replace(/\s+/g, " ").trim().substring(0, 200)
-	return sample
-}
-
 Paste.get_local_storage = function (ls_name) {
 	let obj
 
@@ -279,15 +265,6 @@ Paste.new_paste = function () {
 		Paste.set_comment("")
 		Paste.editor.focus()
 	}
-}
-
-Paste.make_safe = function (s) {
-	let replaced = s.replace(/\</g, "&lt;").replace(/\>/g, "&gt;")
-	return replaced
-}
-
-Paste.remove_non_alphanumeric = function (s) {
-	return s.replace(/[\W_]+/g, "");
 }
 
 Paste.paste_is_modified = function () {
@@ -354,22 +331,6 @@ Paste.stop_loading_mode = function() {
 Paste.start_loading_mode = function() {	
 	Paste.loading.style.display = "flex"
 	Paste.is_loading = true
-}
-
-Paste.get_random_int = function (min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-Paste.get_random_string = function (n) {
-	let text = ""
-
-	let possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
-	for (let i = 0; i < n; i++) {
-		text += possible[Paste.get_random_int(0, possible.length - 1)]
-	}
-
-	return text
 }
 
 Paste.get_token_by_url = function (url) {
@@ -476,4 +437,18 @@ Paste.untab_string = function (s) {
 	}
 	
 	return new_lines.join("\n")
+}
+
+Paste.setup_click_events = function () {
+	Paste.toolbar_save.addEventListener("click", function () {
+		Paste.save_paste()
+	})
+
+	Paste.toolbar_update.addEventListener("click", function () {
+		Paste.update_paste()
+	})
+
+	Paste.toolbar_new.addEventListener("click", function () {
+		Paste.new_paste()
+	})
 }
