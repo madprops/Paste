@@ -9,9 +9,11 @@
 	$parts = parse_url($_SERVER['REQUEST_URI']);
 	parse_str($parts["query"], $query);
 	$code = $query["code"];
+	$token = $query["token"];
 
 	if (is_null_or_empty_string($code)) {
 		$code = "";
+		$token = "";
 		$content = "";
 		$title = "Paste";
 		$comment = "";
@@ -69,6 +71,7 @@
 	<script>
 		window.onload = function() {
 			Paste.code = <?php echo json_encode($code); ?>;
+			Paste.token = <?php echo json_encode($token); ?>;
 			Paste.initial_content = <?php echo json_encode($content); ?>;
 			Paste.initial_comment = <?php echo json_encode($comment); ?>;
 			Paste.saved = <?php echo json_encode($saved); ?>;

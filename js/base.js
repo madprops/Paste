@@ -22,8 +22,9 @@ Paste.init = function () {
 
 	Paste.check_save()
 	Paste.create_editor()
-	Paste.remove_get_parameters_from_url()
 	Paste.get_tokens()
+	Paste.check_initial_token()
+	Paste.remove_get_parameters_from_url()
 	Paste.setup_comment()
 	Paste.setup_window_load()
 	Paste.check_ownership()
@@ -205,6 +206,12 @@ Paste.show_footer_message = function (s, succ) {
 	Paste.footer_timeout = setTimeout(function () {
 		Paste.footer.style.bottom = "-2.5rem"
 	}, 3000)
+}
+
+Paste.check_initial_token = function () {
+	if (Paste.code && Paste.token) {
+		Paste.push_to_tokens(Paste.code, Paste.token)
+	}
 }
 
 Paste.remove_get_parameters_from_url = function () {
