@@ -1,43 +1,43 @@
-const Paste = {}
+const App = {}
 
-Paste.ls_tokens = `tokens_v1`
-Paste.ls_passwd = `passwd_v1`
-Paste.max_content_length = 500000
-Paste.max_comment_length = 200
-Paste.is_loading = true
-Paste.leaving = false
-Paste.updated = false
+App.ls_tokens = `tokens_v1`
+App.ls_passwd = `passwd_v1`
+App.max_content_length = 500000
+App.max_comment_length = 200
+App.is_loading = true
+App.leaving = false
+App.updated = false
 
-Paste.default_comment = `Leave a comment here`
+App.default_comment = `Leave a comment here`
 
-Paste.init = () => {
-	Paste.main = document.getElementById(`paste_main`)
-	Paste.textarea = document.getElementById(`paste_textarea`)
-	Paste.footer = document.getElementById(`paste_footer`)
-	Paste.comment_content = document.getElementById(`paste_comment_content`)
-	Paste.loading = document.getElementById(`paste_loading`)
-	Paste.toolbar_save = document.getElementById(`paste_toolbar_save`)
-	Paste.toolbar_update = document.getElementById(`paste_toolbar_update`)
-	Paste.toolbar_new = document.getElementById(`paste_toolbar_new`)
+App.init = () => {
+	App.main = document.getElementById(`paste_main`)
+	App.textarea = document.getElementById(`paste_textarea`)
+	App.footer = document.getElementById(`paste_footer`)
+	App.comment_content = document.getElementById(`paste_comment_content`)
+	App.loading = document.getElementById(`paste_loading`)
+	App.toolbar_save = document.getElementById(`paste_toolbar_save`)
+	App.toolbar_update = document.getElementById(`paste_toolbar_update`)
+	App.toolbar_new = document.getElementById(`paste_toolbar_new`)
 
-	Paste.check_save()
-	Paste.create_editor()
-	Paste.get_tokens()
-	Paste.check_initial_token()
-	Paste.remove_get_parameters_from_url()
-	Paste.setup_comment()
-	Paste.setup_window_load()
-	Paste.check_ownership()
-	Paste.stop_loading_mode()
-	Paste.setup_click_events()
+	App.check_save()
+	App.create_editor()
+	App.get_tokens()
+	App.check_initial_token()
+	App.remove_get_parameters_from_url()
+	App.setup_comment()
+	App.setup_window_load()
+	App.check_ownership()
+	App.stop_loading_mode()
+	App.setup_click_events()
 
-	Paste.editor.setOption(`mode`, `clike`)
-	Paste.editor.refresh()
-	Paste.editor.focus()
+	App.editor.setOption(`mode`, `clike`)
+	App.editor.refresh()
+	App.editor.focus()
 }
 
-Paste.create_editor = () => {
-	Paste.editor = CodeMirror.fromTextArea(Paste.textarea,
+App.create_editor = () => {
+	App.editor = CodeMirror.fromTextArea(App.textarea,
 		{
 			lineNumbers: true,
 			theme: `nord`,
@@ -47,17 +47,17 @@ Paste.create_editor = () => {
 			indentUnit: 4
 		})
 
-	Paste.document = Paste.editor.getDoc()
-	Paste.set_content(Paste.initial_content)
+	App.document = App.editor.getDoc()
+	App.set_content(App.initial_content)
 }
 
-Paste.update_paste = () => {
-	Paste.save_paste(true)
+App.update_paste = () => {
+	App.save_paste(true)
 }
 
-Paste.paste_is_empty = () => {
-	let content = Paste.get_content(true)
-	let comment = Paste.get_comment()
+App.paste_is_empty = () => {
+	let content = App.get_content(true)
+	let comment = App.get_comment()
 
 	if (!content && !comment) {
 		return true
@@ -66,35 +66,35 @@ Paste.paste_is_empty = () => {
 	return false
 }
 
-Paste.save_paste = (update = false) => {
-	if (update && !Paste.owner) {
+App.save_paste = (update = false) => {
+	if (update && !App.owner) {
 		return false
 	}
 
-	Paste.editor.focus()
+	App.editor.focus()
 
-	let content = Paste.get_content()
-	content = Paste.untab_string(content)
+	let content = App.get_content()
+	content = App.untab_string(content)
 
-	if (Paste.paste_is_empty()) {
-		Paste.show_footer_message(`Can't Save An Empty Paste`, false)
+	if (App.paste_is_empty()) {
+		App.show_footer_message(`Can't Save An Empty App`, false)
 		return false
 	}
 
-	if (content.length > Paste.max_content_length) {
-		Paste.show_footer_message(`Paste Is Too Big`, false)
+	if (content.length > App.max_content_length) {
+		App.show_footer_message(`Paste Is Too Big`, false)
 		return false
 	}
 
-	if (Paste.posting) {
-		Paste.show_footer_message(`Paste Save Already In Progress`, false)
+	if (App.posting) {
+		App.show_footer_message(`Paste Save Already In Progress`, false)
 		return false
 	}
 
 	let token
 
 	if (update) {
-		token = Paste.get_token_by_url(Paste.code)
+		token = App.get_token_by_url(App.code)
 	}
 	else {
 		token = ``
@@ -105,21 +105,21 @@ Paste.save_paste = (update = false) => {
 		let token = response[`token`]
 
 		if (code && token) {
-			Paste.push_to_tokens(code, token)
+			App.push_to_tokens(code, token)
 		}
 
 		if (code) {
-			if (code === Paste.code) {
-				Paste.after_update()
+			if (code === App.code) {
+				App.after_update()
 			}
 			else {
-				Paste.go_to_location(`?code=${code}&saved=true`)
+				App.go_to_location(`?code=${code}&saved=true`)
 			}
 		}
 	}
 
 	let passwd = ``
-	let passwdobj = Paste.get_local_storage(Paste.ls_passwd)
+	let passwdobj = App.get_local_storage(App.ls_passwd)
 
 	if (passwdobj) {
 		passwd = passwdobj.passwd
@@ -127,20 +127,20 @@ Paste.save_paste = (update = false) => {
 
 	if (!passwd) {
 		passwd = prompt(`Enter Password`)
-		Paste.save_local_storage(Paste.ls_passwd, {passwd: passwd})
+		App.save_local_storage(App.ls_passwd, {passwd: passwd})
 	}
 
-	Paste.send_post(`save.php`,
+	App.send_post(`save.php`,
 		{
 			content: content,
-			comment: Paste.get_comment(),
+			comment: App.get_comment(),
 			token: token,
 			passwd: passwd
 		}, onsuccess)
 }
 
-Paste.send_post = (target, data, onsuccess) => {
-	Paste.posting = true
+App.send_post = (target, data, onsuccess) => {
+	App.posting = true
 
 	let XHR = new XMLHttpRequest()
 	let urlEncodedData = ``
@@ -159,12 +159,12 @@ Paste.send_post = (target, data, onsuccess) => {
 
 	// Define what happens on successful data submission
 	XHR.addEventListener(`load`, (event, data) => {
-		Paste.posting = false
+		App.posting = false
 	})
 
 	// Define what happens in case of error
 	XHR.addEventListener(`error`, (event) => {
-		Paste.posting = false
+		App.posting = false
 		console.error(`Oops! Something goes wrong.`)
 	})
 
@@ -184,7 +184,7 @@ Paste.send_post = (target, data, onsuccess) => {
 			}
 
 			console.info(`XHR Error`)
-			Paste.save_local_storage(Paste.ls_passwd, {passwd: ``})
+			App.save_local_storage(App.ls_passwd, {passwd: ``})
 		}
 	}
 
@@ -192,37 +192,37 @@ Paste.send_post = (target, data, onsuccess) => {
 	XHR.send(urlEncodedData)
 }
 
-Paste.show_footer_message = (s, succ) => {
-	clearTimeout(Paste.footer_timeout)
+App.show_footer_message = (s, succ) => {
+	clearTimeout(App.footer_timeout)
 
-	Paste.footer.innerHTML = s
+	App.footer.innerHTML = s
 
 	if (succ) {
-		Paste.footer.style.backgroundColor = `#5bab70`
+		App.footer.style.backgroundColor = `#5bab70`
 	}
 	else {
-		Paste.footer.style.backgroundColor = `#c05f5f`
+		App.footer.style.backgroundColor = `#c05f5f`
 	}
 
-	Paste.footer.style.bottom = `0`
+	App.footer.style.bottom = `0`
 
-	Paste.footer_timeout = setTimeout(() => {
-		Paste.footer.style.bottom = `-2.5rem`
+	App.footer_timeout = setTimeout(() => {
+		App.footer.style.bottom = `-2.5rem`
 	}, 3000)
 }
 
-Paste.check_initial_token = () => {
-	if (Paste.code && Paste.token) {
-		Paste.push_to_tokens(Paste.code, Paste.token)
+App.check_initial_token = () => {
+	if (App.code && App.token) {
+		App.push_to_tokens(App.code, App.token)
 	}
 }
 
-Paste.remove_get_parameters_from_url = () => {
+App.remove_get_parameters_from_url = () => {
 	let url = window.location.href.split(`&`)[0]
-	Paste.change_url(url)
+	App.change_url(url)
 }
 
-Paste.change_url = (url, replace = true) => {
+App.change_url = (url, replace = true) => {
 	if (replace) {
 		window.history.replaceState(`object`, document.title, url)
 	}
@@ -231,14 +231,14 @@ Paste.change_url = (url, replace = true) => {
 	}
 }
 
-Paste.after_update = () => {
-	Paste.updated = true
-	Paste.initial_content = Paste.get_content()
-	Paste.initial_comment = Paste.get_comment()
-	Paste.show_save_success(true)
+App.after_update = () => {
+	App.updated = true
+	App.initial_content = App.get_content()
+	App.initial_comment = App.get_comment()
+	App.show_save_success(true)
 }
 
-Paste.get_local_storage = (ls_name) => {
+App.get_local_storage = (ls_name) => {
 	let obj
 
 	if (localStorage[ls_name]) {
@@ -257,33 +257,33 @@ Paste.get_local_storage = (ls_name) => {
 	return obj
 }
 
-Paste.save_local_storage = (ls_name, obj) => {
+App.save_local_storage = (ls_name, obj) => {
 	obj = JSON.stringify(obj)
 	localStorage.setItem(ls_name, obj)
 }
 
-Paste.go_to_location = (url) => {
-	Paste.leaving = true
+App.go_to_location = (url) => {
+	App.leaving = true
 	window.location.href = url
 }
 
-Paste.new_paste = () => {
-	if (Paste.code) {
+App.new_paste = () => {
+	if (App.code) {
 		let url = window.location.href.split(`?`)[0]
-		Paste.go_to_location(url)
+		App.go_to_location(url)
 	}
 	else {
-		Paste.set_content(``)
-		Paste.set_comment(``)
-		Paste.editor.focus()
+		App.set_content(``)
+		App.set_comment(``)
+		App.editor.focus()
 	}
 }
 
-Paste.paste_is_modified = () => {
+App.paste_is_modified = () => {
 	if
 		(
-		Paste.get_content() === Paste.initial_content &&
-		Paste.get_comment() === Paste.initial_comment
+		App.get_content() === App.initial_content &&
+		App.get_comment() === App.initial_comment
 	) {
 		return false
 	}
@@ -291,8 +291,8 @@ Paste.paste_is_modified = () => {
 	return true
 }
 
-Paste.get_content = (trim = false) => {
-	let value = Paste.document.getValue()
+App.get_content = (trim = false) => {
+	let value = App.document.getValue()
 
 	if (trim) {
 		value = value.trim()
@@ -301,114 +301,114 @@ Paste.get_content = (trim = false) => {
 	return value
 }
 
-Paste.set_content = (s) => {
-	Paste.document.setValue(s)
+App.set_content = (s) => {
+	App.document.setValue(s)
 }
 
-Paste.setup_comment = () => {
-	Paste.comment_content.innerText = Paste.initial_comment
+App.setup_comment = () => {
+	App.comment_content.innerText = App.initial_comment
 
-	Paste.comment_content.addEventListener(`blur`, () => {
-		Paste.set_comment(Paste.get_comment())
+	App.comment_content.addEventListener(`blur`, () => {
+		App.set_comment(App.get_comment())
 	})
 }
 
-Paste.clean_string2 = (s) => {
+App.clean_string2 = (s) => {
 	return s.replace(/\s+/g, ` `).trim()
 }
 
-Paste.get_comment = () => {
-	return Paste.clean_string2(Paste.comment_content.innerText).substring(0, Paste.max_comment_length).trim()
+App.get_comment = () => {
+	return App.clean_string2(App.comment_content.innerText).substring(0, App.max_comment_length).trim()
 }
 
-Paste.set_comment = (val) => {
-	Paste.comment_content.innerText = val
+App.set_comment = (val) => {
+	App.comment_content.innerText = val
 }
 
-Paste.setup_window_load = () => {
+App.setup_window_load = () => {
 	window.onbeforeunload = () => {
-		if (!Paste.leaving && Paste.paste_is_modified()) {
+		if (!App.leaving && App.paste_is_modified()) {
 			return `Are you sure?`
 		}
 		else {
-			Paste.start_loading_mode(true)
+			App.start_loading_mode(true)
 		}
 	}
 }
 
-Paste.stop_loading_mode = () => {
-	Paste.loading.style.display = `none`
-	Paste.is_loading = false
+App.stop_loading_mode = () => {
+	App.loading.style.display = `none`
+	App.is_loading = false
 }
 
-Paste.start_loading_mode = () => {
-	Paste.loading.style.display = `flex`
-	Paste.is_loading = true
+App.start_loading_mode = () => {
+	App.loading.style.display = `flex`
+	App.is_loading = true
 }
 
-Paste.get_token_by_url = (url) => {
-	return Paste.tokens.items[url] || ``
+App.get_token_by_url = (url) => {
+	return App.tokens.items[url] || ``
 }
 
-Paste.get_tokens = () => {
-	Paste.tokens = Paste.get_local_storage(Paste.ls_tokens)
+App.get_tokens = () => {
+	App.tokens = App.get_local_storage(App.ls_tokens)
 
-	if (Paste.tokens === null) {
-		Paste.tokens = {}
+	if (App.tokens === null) {
+		App.tokens = {}
 	}
 
 	let changed = false
 
-	if (Paste.tokens.items === undefined) {
-		Paste.tokens.items = {}
+	if (App.tokens.items === undefined) {
+		App.tokens.items = {}
 
 		changed = true
 	}
 
 	if (changed) {
-		Paste.save_tokens()
+		App.save_tokens()
 	}
 }
 
-Paste.save_tokens = () => {
-	Paste.save_local_storage(Paste.ls_tokens, Paste.tokens)
+App.save_tokens = () => {
+	App.save_local_storage(App.ls_tokens, App.tokens)
 }
 
-Paste.push_to_tokens = (url, token, save = true) => {
-	Paste.tokens.items[url] = token
+App.push_to_tokens = (url, token, save = true) => {
+	App.tokens.items[url] = token
 
 	if (save) {
-		Paste.save_tokens()
+		App.save_tokens()
 	}
 }
 
-Paste.check_ownership = () => {
-	if (Paste.get_token_by_url(Paste.code)) {
-		Paste.owner = true
-		Paste.toolbar_update.classList.remove(`paste_disabled`)
+App.check_ownership = () => {
+	if (App.get_token_by_url(App.code)) {
+		App.owner = true
+		App.toolbar_update.classList.remove(`paste_disabled`)
 	}
 	else {
-		Paste.owner = false
-		Paste.toolbar_update.classList.add(`paste_disabled`)
+		App.owner = false
+		App.toolbar_update.classList.add(`paste_disabled`)
 	}
 }
 
-Paste.show_save_success = (update = false) => {
+App.show_save_success = (update = false) => {
 	if (update) {
-		Paste.show_footer_message(`Paste Updated`, true)
+		App.show_footer_message(`Paste Updated`, true)
 	}
 	else {
-		Paste.show_footer_message(`Paste Saved`, true)
+		App.show_footer_message(`Paste Saved`, true)
 	}
 }
 
-Paste.check_save = () => {
-	if (Paste.saved) {
-		Paste.show_save_success()
+App.check_save = () => {
+	if (App.saved) {
+		App.show_save_success()
 	}
 }
 
-Paste.untab_string = (s) => {
+App.untab_string = (s) => {
 	s = s.replace(/\t/gm, `  `)
 	let lines = s.split(`\n`)
 
@@ -455,16 +455,16 @@ Paste.untab_string = (s) => {
 	return new_lines.join(`\n`)
 }
 
-Paste.setup_click_events = () => {
-	Paste.toolbar_save.addEventListener(`click`, () => {
-		Paste.save_paste()
+App.setup_click_events = () => {
+	App.toolbar_save.addEventListener(`click`, () => {
+		App.save_paste()
 	})
 
-	Paste.toolbar_update.addEventListener(`click`, () => {
-		Paste.update_paste()
+	App.toolbar_update.addEventListener(`click`, () => {
+		App.update_paste()
 	})
 
-	Paste.toolbar_new.addEventListener(`click`, () => {
-		Paste.new_paste()
+	App.toolbar_new.addEventListener(`click`, () => {
+		App.new_paste()
 	})
 }

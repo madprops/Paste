@@ -70,12 +70,12 @@
 	<script src='js/base.js?version=92'></script>
 	<script>
 		window.onload = () => {
-			Paste.code = <?php echo json_encode($code); ?>;
-			Paste.token = <?php echo json_encode($token); ?>;
-			Paste.initial_content = <?php echo json_encode($content); ?>;
-			Paste.initial_comment = <?php echo json_encode($comment); ?>;
-			Paste.saved = <?php echo json_encode($saved); ?>;
-			Paste.init()
+			App.code = <?php echo json_encode($code); ?>;
+			App.token = <?php echo json_encode($token); ?>;
+			App.initial_content = <?php echo json_encode($content); ?>;
+			App.initial_comment = <?php echo json_encode($comment); ?>;
+			App.saved = <?php echo json_encode($saved); ?>;
+			App.init()
 		}
 	</script>
 </head>
