@@ -1,11 +1,9 @@
 <?php
-
 	function is_null_or_empty_string($str) {
 		return (!isset($str) || trim($str) === '');
 	}
 
 	$saved = isset($_GET["saved"]);
-
 	$parts = parse_url($_SERVER['REQUEST_URI']);
 	parse_str($parts["query"], $query);
 	$code = $query["code"];
@@ -17,7 +15,8 @@
 		$content = "";
 		$title = "Paste";
 		$comment = "";
-	} else {
+	}
+	else {
 		// Create a new database, if the file doesn't exist and open it for reading/writing.
 		// The extension of the file is arbitrary.
 		$db = new SQLite3("pastes_v6.sqlite", SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
@@ -42,7 +41,8 @@
 		if (is_null_or_empty_string($comment)) {
 			$comment = "";
 			$title = "Paste - " . $code;
-		} else {
+		}
+		else {
 			$title = "Paste - " . substr($comment, 0, 140);
 		}
 
@@ -69,7 +69,7 @@
 	<script src='codemirror/mode/clike/clike.js'></script>
 	<script src='js/base.js?version=92'></script>
 	<script>
-		window.onload = function() {
+		window.onload = () => {
 			Paste.code = <?php echo json_encode($code); ?>;
 			Paste.token = <?php echo json_encode($token); ?>;
 			Paste.initial_content = <?php echo json_encode($content); ?>;
@@ -89,7 +89,7 @@
 		<div id='paste_toolbar' class='paste_unselectable'>
 			<div id='paste_toolbar_save' class='paste_toolbar_button_container'>
 				<span class='paste_toolbar_button'>Save</span>
-			</div>			
+			</div>
 			<div id='paste_toolbar_update' class='paste_toolbar_button_container paste_border_left'>
 				<span class='paste_toolbar_button'>Update</span>
 			</div>
