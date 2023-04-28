@@ -80,36 +80,36 @@
 	</script>
 </head>
 <body>
-	<div id='paste_main'>
-		<div id='paste_comment_container'>
-			<div id='paste_comment_placeholder'>Leave A Comment</div>
-			<div id='paste_comment_content' contenteditable="true"></div>
+	<div id="paste_main">
+		<div id="paste_comment_container">
+			<div id="paste_comment_placeholder">Leave A Comment</div>
+			<div id="paste_comment_content" contenteditable="true"></div>
 		</div>
 
-		<div id='paste_toolbar' class='paste_unselectable'>
-			<div id='paste_toolbar_save' class='paste_toolbar_button_container'>
-				<span class='paste_toolbar_button'>Save</span>
+		<div id="paste_toolbar" class="paste_unselectable">
+			<div id="paste_toolbar_save" class="paste_toolbar_button_container">
+				<span class="paste_toolbar_button">Save</span>
 			</div>
-			<div id='paste_toolbar_update' class='paste_toolbar_button_container paste_border_left'>
-				<span class='paste_toolbar_button'>Update</span>
+			<div id="paste_toolbar_update" class="paste_toolbar_button_container paste_border_left">
+				<span class="paste_toolbar_button">Update</span>
 			</div>
-			<div id='paste_toolbar_new' class='paste_toolbar_button_container paste_border_left'>
-				<span class='paste_toolbar_button'>New</span>
+			<div id="paste_toolbar_new" class="paste_toolbar_button_container paste_border_left">
+				<span class="paste_toolbar_button">New</span>
 			</div>
 		</div>
 
-		<div id='paste_content_main'>
-			<textarea id='paste_textarea'></textarea>
-			<div id='paste_render_container'>
-				<iframe id='paste_render_iframe'></iframe>
+		<div id="paste_content_main">
+			<textarea id="paste_textarea"></textarea>
+			<div id="paste_render_container">
+				<iframe id="paste_render_iframe"></iframe>
 			</div>
 		</div>
 	</div>
 
-	<div id='paste_loading' class='paste_unselectable'>
-		<div id='paste_loading_content'>Loading</div>
+	<div id="paste_loading" class="paste_unselectable">
+		<div id="paste_loading_content">Loading</div>
 	</div>
 
-	<div id='paste_footer' class='paste_unselectable'></div>
+	<div id="paste_footer" class="paste_unselectable"></div>
 </body>
 </html>
