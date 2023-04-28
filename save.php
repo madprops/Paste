@@ -5,21 +5,21 @@ ini_set("display_errors", "On");
 
 ob_start();
 
-function is_null_or_empty_string($str) {
+function is_null_or_empty_string ($str) {
 	return (!isset($str) || trim($str) === "");
 }
 
-function random_number_string($length = 10) {
+function random_number_string ($length = 10) {
 	return substr(str_shuffle(str_repeat($x="0123456789", ceil($length/strlen($x)) )),1,$length);
 }
 
-function random_word($length = 4) {  
+function random_word ($length = 4) {
 	$string = "";
-	
-	$vowels = array("a","e","i","o","u");  
-	
+
+	$vowels = array("a","e","i","o","u");
+
 	$consonants = array(
-	"b", "c", "d", "f", "g", "h", "j", "k", "l", "m", 
+	"b", "c", "d", "f", "g", "h", "j", "k", "l", "m",
 	"n", "p", "r", "s", "t", "v", "w", "x", "y", "z"
 	);
 
@@ -35,7 +35,7 @@ function random_word($length = 4) {
 	return $string;
 }
 
-function random_string($length = 10)  {
+function random_string ($length = 10)  {
 	$characters = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 	$charactersLength = strlen($characters);
 	$randomString = "";
@@ -47,7 +47,7 @@ function random_string($length = 10)  {
 	return $randomString;
 }
 
-function generate_token($ourl) {
+function generate_token ($ourl) {
 	return $ourl . random_string(40);
 }
 
@@ -75,7 +75,8 @@ $date = time();
 
 if (isset($_POST["passwd"])) {
 	$passwd = $_POST["passwd"];
-} else {
+}
+else {
 	exit();
 }
 
@@ -87,7 +88,8 @@ if ($passwd != $passwd_file) {
 
 if (isset($_POST["content"])) {
 	$content = $_POST["content"];
-} else {
+}
+else {
 	exit();
 }
 
@@ -99,7 +101,8 @@ if ($content_length > $max_content_length) {
 
 if (isset($_POST["comment"])) {
 	$comment = $_POST["comment"];
-} else {
+}
+else {
 	$comment = "";
 }
 
@@ -118,14 +121,16 @@ if (isset($_POST["token"])) {
 
 	if (is_null_or_empty_string($token)) {
 		$update = false;
-	} else {
+	}
+	else {
 		$update = true;
 	}
-} else {
+}
+else {
 	$update = false;
 }
 
-if ($update) {	
+if ($update) {
 	$statement = $db->prepare('SELECT code FROM "pastes" WHERE "token" = ?');
 	$statement->bindValue(1, $token);
 	$result = $statement->execute();
@@ -133,16 +138,18 @@ if ($update) {
 
 	if ($array != false) {
 		$code = $array["code"];
-	} else {
+	}
+	else {
 		exit();
 	}
-} else {
+}
+else {
 	$code = $date . "-" . random_word(6);
 	$token = generate_token($code);
 }
 
 if ($update) {
-	$statement = $db->prepare('UPDATE "pastes" 
+	$statement = $db->prepare('UPDATE "pastes"
 		SET content=:acontent, comment=:acomment, modified=:amodified
 		WHERE token=:token');
 
@@ -152,8 +159,9 @@ if ($update) {
 	$statement->bindValue(":token", $token);
 
 	$statement->execute();
-} else {
-	$statement = $db->prepare('INSERT INTO "pastes" 
+}
+else {
+	$statement = $db->prepare('INSERT INTO "pastes"
 		("content", "code", "comment", "date", "modified", "token")
 		VALUES (:acontent, :acode, :acomment, :adate, :amodified, :atoken)');
 
@@ -168,9 +176,6 @@ if ($update) {
 }
 
 $db->exec("COMMIT");
-
 $db->close();
-
 $response = array("code" => $code, "token" => $token);
-
 echo json_encode($response);

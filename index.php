@@ -1,5 +1,5 @@
 <?php
-	function is_null_or_empty_string($str) {
+	function is_null_or_empty_string ($str) {
 		return (!isset($str) || trim($str) === '');
 	}
 
