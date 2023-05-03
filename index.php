@@ -57,17 +57,18 @@
 <head>
 	<title><?php echo $title ?></title>
 	<link rel="icon" type="image/png" href="favicon.png"/>
-	<link rel="stylesheet" href='codemirror/lib/codemirror.css'>
-	<link rel="stylesheet" href='codemirror/theme/nord.css'>
-	<link rel="stylesheet" href='css/style.css?version=41'>
-	<script src='codemirror/lib/codemirror.js'></script>
-	<script src='codemirror/addon/mode/overlay.js'></script>
-	<script src='codemirror/addon/mode/simple.js'></script>
-	<script src='codemirror/addon/mode/multiplex.js'></script>
-	<script src='codemirror/addon/mode/loadmode.js'></script>
-	<script src='codemirror/mode/meta.js'></script>
-	<script src='codemirror/mode/clike/clike.js'></script>
-	<script src='js/base.js?version=92'></script>
+	<link rel="stylesheet" href='js/libs/codemirror/lib/codemirror.css'>
+	<link rel="stylesheet" href='js/libs/codemirror/theme/nord.css'>
+	<link rel="stylesheet" href='css/style.css'>
+	<script src='js/libs/codemirror/lib/codemirror.js'></script>
+	<script src='js/libs/codemirror/addon/mode/overlay.js'></script>
+	<script src='js/libs/codemirror/addon/mode/simple.js'></script>
+	<script src='js/libs/codemirror/addon/mode/multiplex.js'></script>
+	<script src='js/libs/codemirror/addon/mode/loadmode.js'></script>
+	<script src='js/libs/codemirror/mode/meta.js'></script>
+	<script src='js/libs/codemirror/mode/clike/clike.js'></script>
+	<script src='js/libs/dom.js'></script>
+	<script src='js/main/base.js'></script>
 	<script>
 		window.onload = () => {
 			App.code = <?php echo json_encode($code); ?>;

@@ -11,14 +11,14 @@ App.updated = false
 App.default_comment = `Leave a comment here`
 
 App.init = () => {
-	App.main = document.getElementById(`paste_main`)
-	App.textarea = document.getElementById(`paste_textarea`)
-	App.footer = document.getElementById(`paste_footer`)
-	App.comment_content = document.getElementById(`paste_comment_content`)
-	App.loading = document.getElementById(`paste_loading`)
-	App.toolbar_save = document.getElementById(`paste_toolbar_save`)
-	App.toolbar_update = document.getElementById(`paste_toolbar_update`)
-	App.toolbar_new = document.getElementById(`paste_toolbar_new`)
+	App.main = DOM.el(`#paste_main`)
+	App.textarea = DOM.el(`#paste_textarea`)
+	App.footer = DOM.el(`#paste_footer`)
+	App.comment_content = DOM.el(`#paste_comment_content`)
+	App.loading = DOM.el(`#paste_loading`)
+	App.toolbar_save = DOM.el(`#paste_toolbar_save`)
+	App.toolbar_update = DOM.el(`#paste_toolbar_update`)
+	App.toolbar_new = DOM.el(`#paste_toolbar_new`)
 
 	App.check_save()
 	App.create_editor()
