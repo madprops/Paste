@@ -82,11 +82,11 @@ $date = time();
 // 	exit();
 // }
 
-$passwd_file = trim(file_get_contents("passwd.data"));
+// $passwd_file = trim(file_get_contents("passwd.data"));
 
-if ($passwd != $passwd_file) {
-	exit(1);
-}
+// if ($passwd != $passwd_file) {
+// 	exit(1);
+// }
 
 if (isset($_POST["content"])) {
 	$content = $_POST["content"];
