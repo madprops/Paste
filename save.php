@@ -73,12 +73,14 @@ $db->exec("BEGIN");
 
 $date = time();
 
-if (isset($_POST["passwd"])) {
-	$passwd = $_POST["passwd"];
-}
-else {
-	exit();
-}
+// Enable if you want to use a password to save pastes
+
+// if (isset($_POST["passwd"])) {
+// 	$passwd = $_POST["passwd"];
+// }
+// else {
+// 	exit();
+// }
 
 $passwd_file = trim(file_get_contents("passwd.data"));
 

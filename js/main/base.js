@@ -125,10 +125,12 @@ App.save_paste = (update = false) => {
 		passwd = passwdobj.passwd
 	}
 
-	if (!passwd) {
-		passwd = prompt(`Enter Password`)
-		App.save_local_storage(App.ls_passwd, {passwd: passwd})
-	}
+	// Enable if you want to use a password to save pastes
+
+	// if (!passwd) {
+	// 	passwd = prompt(`Enter Password`)
+	// 	App.save_local_storage(App.ls_passwd, {passwd: passwd})
+	// }
 
 	App.send_post(`save.php`,
 		{
