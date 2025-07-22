@@ -1,5 +1,3 @@
-![](https://i.imgur.com/Bkj0LoW.jpg)
-
 Apache TLS VirtualHost Example:
 
 ```
